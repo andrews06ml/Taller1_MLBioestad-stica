@@ -228,8 +228,9 @@ columnas_categoricas = df_categoricas.columns.tolist()
 st.subheader("Distribución de las variables")
 
 # Para variables numericas
-df_numericas.hist(figsize=(15,10), bins=30, edgecolor='black')
-plt.show()
+fig, ax = plt.subplots(figsize=(15,10))
+df_numericas.hist(ax=ax, bins=30, edgecolor='black')  # si df_numericas es un DataFrame, esto funciona
+st.pyplot(fig)
 
 
 # Crear figura con 4 filas y 4 columnas
