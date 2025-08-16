@@ -60,15 +60,15 @@ category_mappings = {
     },
     "Sleep disorder": {
         "Y": "Si",
-        "N": "No",
+        "N": "No"
     },
     "Caffeine consumption": {
         "Y": "Si",
-        "N": "No",
+        "N": "No"
     },
     "Alcohol consumption": {
         "Y": "Si",
-        "N": "No",
+        "N": "No"
     }
 }
 
