@@ -51,6 +51,34 @@ df = load_data()
 
 # df["Condition"] = df.apply(assign_condition, axis=1)
 
+# Diccionario de códigos por variable categórica
+category_mappings = {
+    "Gender": {
+        M: "Masculino",
+        F: "Femenino"
+    },
+    "Sleep disorder": {
+        Y: "Si",
+        N: "No",
+    },
+    "Caffeine consumption": {
+        Y: "Si",
+        N: "No",
+    },
+    "Alcohol consumption": {
+        Y: "Si",
+        N: "No",
+    }
+}
+
+def apply_categorical_mappings(df, mappings):
+    for col, mapping in mappings.items():
+        if col in df.columns:
+            df[col] = df[col].map(mapping)
+    return df
+
+df = apply_categorical_mappings(df, category_mappings)
+
 st.markdown("""
 # 🏥 **Taller No. 1 - Machine learning II para bioestadística**
 ---
@@ -86,10 +114,26 @@ NHANES es un recurso valioso para investigadores, médicos y políticas pública
 **Fuente:** [NHANES 2015-2016](https://wwwn.cdc.gov/nchs/nhanes/continuousnhanes/default.aspx?BeginYear=2015)
 """)
 
-
+st.markdown("---")
 # Mostrar info y variables categóricas lado a lado
-st.subheader("Resumen de Datos")
+st.header("1. Cargue y exploración inicial de la base de datos")
 
+st.subheader("Base de datos")
+pd.set_option('display.max_columns', None)
+df.head(10)
+
+st.markdown("""
+La base de datos utilizada cuenta con 20.000 registros y 26 variables, donde cada fila corresponde a un sujeto de estudio, hombre o mujer, con edades comprendidas entre los 18 y 45 años. La información recopilada es de gran relevancia para el desarrollo de investigaciones médicas orientadas a la salud ocular y los hábitos de vida de la población.
+
+Entre las variables incluidas se encuentran datos sobre horas y calidad del sueño, niveles de estrés, frecuencia de actividad física, pulso, presión arterial, peso y estatura. También se registran aspectos relacionados con hábitos alimenticios y de consumo de bebidas, como la ingesta de cafeína y alcohol, así como el tabaquismo.
+
+En cuanto a la salud visual, la base de datos contiene información sobre síntomas y signos oculares, tales como enrojecimiento, irritación, malestar o fatiga visual y la presencia de ojo seco. Asimismo, se incluyen datos sobre tiempo de exposición a pantallas y antecedentes de problemas médicos que puedan estar vinculados al estado de salud ocular.
+
+Este conjunto de datos ofrece un panorama integral de factores fisiológicos, conductuales y ambientales, lo que lo convierte en una herramienta valiosa para identificar patrones, analizar relaciones y proponer estrategias de prevención y tratamiento en el ámbito de la salud visual.
+""")
+
+
+st.subheader("Resumen de datos")
 # Crear columnas para mostrar info_df y category_df lado a lado
 col1, col2 = st.columns(2)
 
@@ -122,21 +166,19 @@ with col2:
     st.dataframe(category_df, use_container_width=True)
 
 
-st.subheader("Primeras 10 filas del dataset")
-st.dataframe(df.head(10), use_container_width=True)
-
 # Filtros
 with st.sidebar:
-    st.header("Filters")
-    gender_filter = st.multiselect("Gender", sorted(df["Gender"].dropna().unique()))
-    race_filter = st.multiselect("Race/Ethnicity", sorted(df["Race/Ethnicity"].dropna().unique()))
-    condition_filter = st.multiselect("Condition", sorted(df["Condition"].dropna().unique()))
+    st.header("Filtros")
+    gender_filter = st.multiselect("Genero", sorted(df["Gender"].dropna().unique()))
+    sleep_filter = st.multiselect("Transtornos del sueño", sorted(df["Sleep disorder"].dropna().unique()))
+    cafe_filter = st.multiselect("Consumo de cafe", sorted(df["Caffeine consumption"].dropna().unique()))
+    alcohol_filter = st.multiselect("Consumo de alcohol", sorted(df["Alcohol consumption"].dropna().unique()))
     #st.markdown("---")
     #k_vars = st.slider("Number of variables to select", 2, 10, 5)
 
 # Aplicar filtros
 for col, values in {
-    "Gender": gender_filter, "Race/Ethnicity": race_filter, "Condition": condition_filter
+    "Genero": gender_filter, "Transtornos del sueño": sleep_filter, "Consumo de cafe": cafe_filter, "Consumo de alcohol": alcohol_filter
 }.items():
     if values:
         df = df[df[col].isin(values)]
@@ -155,6 +197,123 @@ if problematic_cols or nullable_ints:
     st.write("**Tipo 'Int64' (nullable):**", nullable_ints)
 else:
     st.success("✅ No hay columnas problemáticas detectadas.")
+
+st.markdown("---")
+st.header("2. Análisis exploratorio de datos")
+
+# Creación de nuevas variables según el valor de la presión arterial y conversión de genero
+df = (df.assign(**df['Blood pressure'].str.split('/', expand=True)
+                 .rename(columns={0:'Presion_Sistolica', 1:'Presion_Diastolica'})
+                 .apply(pd.to_numeric, errors='coerce'))
+        .assign(Presion_Pulso=lambda x: x['Presion_Sistolica'] - x['Presion_Diastolica'])
+        .drop(columns=['Blood pressure'])
+     )
+
+# Convertir todas las columnas tipo object a category
+df = df.astype({col: "category" for col in df.select_dtypes(include="object").columns})
+
+# Variables numericas
+df_numericas = df.select_dtypes(include=[np.number])
+# nombres de columnas numericas
+columnas_numericas = df_numericas.columns.tolist()
+
+# Variables categoricas
+df_categoricas = df.select_dtypes(include=["category"])
+
+# nombres de columnas categoricas
+columnas_categoricas = df_categoricas.columns.tolist()
+
+
+st.subheader("Distribución de las variables")
+
+# Para variables numericas
+df_numericas.hist(figsize=(15,10), bins=30, edgecolor='black')
+plt.show()
+
+
+# Crear figura con 4 filas y 4 columnas
+fig, axes = plt.subplots(4, 4, figsize=(25, 20))
+axes = axes.flatten()  # Convertir la matriz de ejes a lista
+
+# Recorrer las columnas y graficar
+for i, col in enumerate(df_categoricas):
+    sns.countplot(x=col, data=df, ax=axes[i])
+    axes[i].set_title(col)
+    axes[i].tick_params(axis='x', rotation=90)
+
+# Ocultar ejes vacíos si hay menos de 16 gráficas
+for j in range(i + 1, len(axes)):
+    fig.delaxes(axes[j])
+
+plt.tight_layout()
+plt.show()
+
+st.subheader("Validación de datos atípicos")
+
+# Crear figura con 3 filas y 3 columnas
+fig, axes = plt.subplots(4, 4, figsize=(20, 15))
+axes = axes.flatten()  # Convertir la matriz de ejes a lista
+
+for i, col in enumerate(df_numericas):
+    sns.boxplot(x=df[col], ax=axes[i])
+    axes[i].set_title(col)
+    axes[i].tick_params(axis='x', rotation=45)
+
+# Eliminar ejes vacíos si hay menos gráficos que subplots
+for j in range(i + 1, len(axes)):
+    fig.delaxes(axes[j])
+
+plt.tight_layout()
+plt.show()
+st.write("Como se puede ver en los diagramas de cajas y bigotes, las 10 variables numéricas contenidas en la base de datos no cuentan con valores atípicos.")
+
+st.subheader("Balance de la variable dependiente (dry eye disease)")
+
+# Conteo absoluto
+print(df["Dry Eye Disease"].value_counts())
+
+# Porcentaje
+print(df["Dry Eye Disease"].value_counts(normalize=True) * 100)
+
+# Visualización
+sns.countplot(x="Dry Eye Disease", data=df)
+plt.title("Distribución de la variable objetivo (Dry Eye Disease)")
+plt.show()
+st.write("Para esta actividad vamos a tomar como variable objetivo "Dry Eye Disease" que significa que el sujeto tiene la enfermedad del ojo seco. donde Y es si y N es no. Se observa que existen más casos en la base donde el sujeto tiene la enfermedad por lo que podría ser de gran ayuda a la hora de realizar el modelo de clasificación.")
+
+st.subheader("Correlaciones")
+
+# Identificar tipos de variables
+num_vars = df.select_dtypes(include=[np.number]).columns
+cat_vars = df.select_dtypes(exclude=[np.number]).columns.drop("Dry Eye Disease", errors="ignore")
+
+print("Variables numéricas:", list(num_vars))
+print("Variables categóricas:", list(cat_vars))
+
+# Correlación variables numéricas vs dry disease
+correlations = {}
+for col in num_vars:
+    corr, pval = spearmanr(df[col], df['Dry Eye Disease'])
+    correlations[col] = {"Spearman_corr": corr, "p-value": pval}
+
+cor_num = pd.DataFrame(correlations).T
+print("\nCorrelación con variables numéricas:")
+print(cor_num.sort_values("Spearman_corr", ascending=False))
+
+# Asociación variables categóricas vs dry disease
+assoc_cat = {}
+for col in cat_vars:
+    table = pd.crosstab(df[col], df['Dry Eye Disease'])
+    chi2, p, dof, expected = chi2_contingency(table)
+    assoc_cat[col] = {"Chi2": chi2, "p-value": p}
+
+assoc_cat_df = pd.DataFrame(assoc_cat).T
+print("\nAsociación con variables categóricas:")
+print(assoc_cat_df.sort_values("p-value"))
+
+
+
+
 
 # Separar variables
 #target_col = "Condition"
