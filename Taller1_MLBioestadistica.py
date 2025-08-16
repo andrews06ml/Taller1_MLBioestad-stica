@@ -279,7 +279,7 @@ print(df["Dry Eye Disease"].value_counts(normalize=True) * 100)
 sns.countplot(x="Dry Eye Disease", data=df)
 plt.title("Distribución de la variable objetivo (Dry Eye Disease)")
 plt.show()
-st.write("Para esta actividad vamos a tomar como variable objetivo "Dry Eye Disease" que significa que el sujeto tiene la enfermedad del ojo seco. donde Y es si y N es no. Se observa que existen más casos en la base donde el sujeto tiene la enfermedad por lo que podría ser de gran ayuda a la hora de realizar el modelo de clasificación.")
+st.write("Para esta actividad vamos a tomar como variable objetivo (Dry Eye Disease) que significa que el sujeto tiene la enfermedad del ojo seco. donde Y es si y N es no. Se observa que existen más casos en la base donde el sujeto tiene la enfermedad por lo que podría ser de gran ayuda a la hora de realizar el modelo de clasificación.")
 
 st.subheader("Correlaciones")
 
