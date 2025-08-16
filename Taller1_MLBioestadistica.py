@@ -7,23 +7,25 @@ from sklearn.decomposition import PCA
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.feature_selection import SelectKBest, f_classif, RFE
+from sklearn.feature_selection import SelectKBest, f_classif, RFE, chi2
 from sklearn.pipeline import Pipeline
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
 import matplotlib.pyplot as plt
+from scipy.stats import spearmanr, chi2_contingency
 import seaborn as sns
 from mca import MCA  # Asegúrate de tener instalada la librería: pip install mca
 from sklearn.base import BaseEstimator, TransformerMixin
 import prince
-from sklearn.preprocessing import FunctionTransformer
+from sklearn.preprocessing import FunctionTransformer, LabelEncoder, StandardScaler
 from sklearn.feature_selection import SequentialFeatureSelector
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
+from sklearn.decomposition import PCA
 
 
-st.set_page_config(page_title="PCA Streamlit App", layout="wide")
-st.title("PCA and MCA Analysis with NHANES Data")
+st.set_page_config(page_title="Taller1_MLBioestadística", layout="wide")
+st.title("Análisis, preprocesamiento y reducción de dimensionalidad Dry Eye Disease")
 
 @st.cache_data
 def load_data():
