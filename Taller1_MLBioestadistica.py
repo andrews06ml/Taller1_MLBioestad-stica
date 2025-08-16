@@ -35,6 +35,7 @@ def load_data():
 
 df = load_data()
 
+st.dataframe(df, use_container_width=True)
 
 # Asignar condiciones
 # def assign_condition(row):
