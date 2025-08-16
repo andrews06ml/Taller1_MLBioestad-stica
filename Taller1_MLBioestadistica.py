@@ -55,20 +55,20 @@ st.dataframe(df, use_container_width=True)
 # Diccionario de códigos por variable categórica
 category_mappings = {
     "Gender": {
-        M: "Masculino",
-        F: "Femenino"
+        "M": "Masculino",
+        "F": "Femenino"
     },
     "Sleep disorder": {
-        Y: "Si",
-        N: "No",
+        "Y": "Si",
+        "N": "No",
     },
     "Caffeine consumption": {
-        Y: "Si",
-        N: "No",
+        "Y": "Si",
+        "N": "No",
     },
     "Alcohol consumption": {
-        Y: "Si",
-        N: "No",
+        "Y": "Si",
+        "N": "No",
     }
 }
 
