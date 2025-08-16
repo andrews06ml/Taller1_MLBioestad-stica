@@ -311,6 +311,41 @@ assoc_cat_df = pd.DataFrame(assoc_cat).T
 print("\nAsociación con variables categóricas:")
 print(assoc_cat_df.sort_values("p-value"))
 
+# Visualización correlaciones numéricas 
+plt.figure(figsize=(8,5))
+sns.heatmap(df[num_vars].corr(method="spearman"), annot=True, cmap="coolwarm")
+plt.title("Matriz de correlación (Spearman)")
+plt.show()
+
+# Visualización correlaciones categóricas
+def cramers_v(confusion_matrix):
+    chi2 = chi2_contingency(confusion_matrix)[0]
+    n = confusion_matrix.sum().sum()
+    phi2 = chi2 / n
+    r, k = confusion_matrix.shape
+    phi2corr = max(0, phi2 - ((k-1)*(r-1))/(n-1))
+    rcorr = r - ((r-1)**2)/(n-1)
+    kcorr = k - ((k-1)**2)/(n-1)
+    return np.sqrt(phi2corr / min((kcorr-1), (rcorr-1)))
+
+# Calcular matriz de Cramer’s V para todas las categóricas
+cat_vars = df.select_dtypes(exclude=[np.number]).columns
+assoc_matrix = pd.DataFrame(index=cat_vars, columns=cat_vars)
+
+for col1 in cat_vars:
+    for col2 in cat_vars:
+        table = pd.crosstab(df[col1], df[col2])
+        assoc_matrix.loc[col1, col2] = cramers_v(table)
+
+assoc_matrix = assoc_matrix.astype(float)
+
+# Heatmap
+plt.figure(figsize=(10,8))
+sns.heatmap(assoc_matrix, annot=True, cmap="coolwarm", vmin=0, vmax=1)
+plt.title("Mapa de calor de asociación (Cramer's V) entre variables categóricas")
+plt.show()
+
+st.header("Separación del df y la variable a predecir")
 
 
 
