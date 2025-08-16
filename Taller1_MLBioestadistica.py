@@ -28,12 +28,12 @@ st.set_page_config(page_title="Taller1_MLBioestadística", layout="wide")
 st.title("Análisis, preprocesamiento y reducción de dimensionalidad Dry Eye Disease")
 
 @st.cache_data
-# def load_data():
-#     url = "https://raw.githubusercontent.com/andrews06ml/Taller1_MLBioestad-stica/blob/main/Dry_Eye_Dataset.csv"
-#     df = pd.read_csv(url, encoding="latin-1", sep = ",")
-#     df.columns = df.columns.str.strip()
-#     return df
-df = pd.read_csv("https://raw.githubusercontent.com/andrews06ml/Taller1_MLBioestad-stica/blob/main/Dry_Eye_Dataset.csv")
+def load_data():
+    url = "https://raw.githubusercontent.com/andrews06ml/Taller1_MLBioestadistica/main/Dry_Eye_Dataset.csv"
+    df = pd.read_csv(url)
+    return df
+
+df = load_data()
 
 
 # Asignar condiciones
