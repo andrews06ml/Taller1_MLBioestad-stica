@@ -29,7 +29,7 @@ st.title("Análisis, preprocesamiento y reducción de dimensionalidad Dry Eye Di
 
 @st.cache_data
 def load_data():
-    url = "https://raw.githubusercontent.com/andrews06ml/Taller1_MLBioestadistica/main/Dry_Eye_Dataset.csv"
+    url = "https://raw.githubusercontent.com/andrews06ml/Taller1_MLBioestadistica/refs/heads/main/Dry_Eye_Dataset.csv"
     df = pd.read_csv(url)
     return df
 
