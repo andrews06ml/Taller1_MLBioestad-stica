@@ -98,23 +98,6 @@ El archivo contiene información de unas 20.000 personas (adolescentes, adultos 
 
  ***Link con mayor información: [Enfermedad del Ojo seco](https://www.kaggle.com/datasets/dakshnagra/dry-eye-disease)***
 
-### Propósito del Análisis en esta App:
-
-- Clasificar a los participantes en grupos de salud: **hipertensión**, **diabetes**, **alto colesterol** y **saludable**, basados en indicadores clínicos.
-- Realizar un análisis exploratorio con técnicas de reducción de dimensionalidad como:
-  - PCA (Análisis de Componentes Principales) para variables numéricas.
-  - MCA (Análisis de Correspondencias Múltiples) para variables categóricas.
-- Seleccionar las variables más relevantes para la clasificación usando técnicas estadísticas y de machine learning.
-
-### Importancia:
-
-NHANES es un recurso valioso para investigadores, médicos y políticas públicas que buscan entender factores de riesgo y prevalencia de enfermedades crónicas en la población estadounidense. Este análisis ayuda a identificar patrones clave en los datos que pueden guiar intervenciones de salud.
-
----
-
-**Fuente:** [NHANES 2015-2016](https://wwwn.cdc.gov/nchs/nhanes/continuousnhanes/default.aspx?BeginYear=2015)
-""")
-
 st.markdown("---")
 # Mostrar info y variables categóricas lado a lado
 st.header("1. Cargue y exploración inicial de la base de datos")
