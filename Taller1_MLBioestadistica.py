@@ -27,6 +27,8 @@ from sklearn.decomposition import PCA
 st.set_page_config(page_title="Taller1_MLBioestadística", layout="wide")
 st.title("Análisis, preprocesamiento y reducción de dimensionalidad Dry Eye Disease")
 
+tab1, tab2, tab3 = st.tabs(["📊 Exploración", "⚙️ Modelado", "📈 Resultados"])
+
 @st.cache_data
 def load_data():
     url = "https://raw.githubusercontent.com/andrews06ml/Taller1_MLBioestadistica/refs/heads/main/Dry_Eye_Dataset.csv"
@@ -307,7 +309,7 @@ for col1 in cat_vars:
 assoc_matrix = assoc_matrix.astype(float)
 
 # Heatmap
-fig, ax = plt.subplot(figsize=(10,8))
+fig, ax = plt.subplots(figsize=(10,8))
 sns.heatmap(assoc_matrix, annot=True, cmap="coolwarm", vmin=0, vmax=1)
 ax.set_title("Mapa de calor de asociación (Cramer's V) entre variables categóricas")
 st.pyplot(fig)
