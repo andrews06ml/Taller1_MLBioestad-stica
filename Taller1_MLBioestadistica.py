@@ -171,16 +171,11 @@ if df.empty:
     st.warning("No data available after applying filters.")
     st.stop()
 
-# Mostrar advertencias
-problematic_cols = df.columns[df.dtypes == "object"].tolist()
-nullable_ints = df.columns[df.dtypes.astype(str).str.contains("Int64")].tolist()
+st.subheader("Tipos de variables")
+print(df.dtypes.value_counts())
 
-st.write("### ⚠️ Columnas potencialmente problemáticas para Arrow/Streamlit:")
-if problematic_cols or nullable_ints:
-    st.write("**Tipo 'object':**", problematic_cols)
-    st.write("**Tipo 'Int64' (nullable):**", nullable_ints)
-else:
-    st.success("✅ No hay columnas problemáticas detectadas.")
+st.markdown("""Se observa que de las 26 variables con las que cuenta la base, 16 son categóricas y 10 son numéricas. Adicionalmente no se evidencian valores faltantes en ningun registro por lo que no hay necesidad de imputar ni eliminar variables.
+""")
 
 st.markdown("---")
 st.header("2. Análisis exploratorio de datos")
@@ -207,15 +202,15 @@ df_categoricas = df.select_dtypes(include=["category"])
 # nombres de columnas categoricas
 columnas_categoricas = df_categoricas.columns.tolist()
 
-
 st.subheader("Distribución de las variables")
 
+st.markdown("### Variables numéricas")
 # Para variables numericas
 fig, ax = plt.subplots(figsize=(15,10))
 df_numericas.hist(ax=ax, bins=30, edgecolor='black')  # si df_numericas es un DataFrame, esto funciona
 st.pyplot(fig)
 
-
+st.markdown("### Variables categóricas")
 # Crear figura con 4 filas y 4 columnas
 fig, axes = plt.subplots(4, 4, figsize=(25, 20))
 axes = axes.flatten()  # Convertir la matriz de ejes a lista
@@ -231,7 +226,7 @@ for j in range(i + 1, len(axes)):
     fig.delaxes(axes[j])
 
 plt.tight_layout()
-plt.show()
+st.pyplot(fig)
 
 st.subheader("Validación de datos atípicos")
 
@@ -249,7 +244,7 @@ for j in range(i + 1, len(axes)):
     fig.delaxes(axes[j])
 
 plt.tight_layout()
-plt.show()
+st.pyplot(fig)
 st.write("Como se puede ver en los diagramas de cajas y bigotes, las 10 variables numéricas contenidas en la base de datos no cuentan con valores atípicos.")
 
 st.subheader("Balance de la variable dependiente (dry eye disease)")
