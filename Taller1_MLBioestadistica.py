@@ -331,3 +331,4 @@ X_train_cat, X_test_cat, y_train_cat, y_test_cat = train_test_split(X_cat, y, te
 
 st.write(f"Base, categórica: {X_train_cat.shape}")
 st.write(f"Base, numérica: {X_train_num.shape}")
+st.text("Se realizan los conjuntos de entrenamiento para las variables numéricas y categóricas distribuidos de la siguiente forma: 80% entrenamiento y 20% prueba")
