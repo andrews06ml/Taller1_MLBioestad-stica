@@ -290,7 +290,7 @@ with tab1:
     
     # Visualización correlaciones numéricas 
     fig, ax = plt.subplots(figsize=(8,5))
-    sns.heatmap(df[num_vars].corr(method="spearman"), annot=True, cmap="coolwarm", annot_kws={"size": 6})
+    sns.heatmap(df[num_vars].corr(method="spearman"), annot=True, cmap="coolwarm", annot_kws={"size": 7})
     ax.set_title("Matriz de correlación (Spearman)")
     st.pyplot(fig)
     
@@ -318,7 +318,7 @@ with tab1:
     
     # Heatmap
     fig, ax = plt.subplots(figsize=(10,8))
-    sns.heatmap(assoc_matrix, annot=True, cmap="coolwarm", vmin=0, vmax=1)
+    sns.heatmap(assoc_matrix, annot=True, cmap="coolwarm", vmin=0, vmax=1, annot_kws={"size": 7})
     ax.set_title("Mapa de calor de asociación (Cramer's V) entre variables categóricas")
     st.pyplot(fig)
     
