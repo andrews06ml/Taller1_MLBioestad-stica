@@ -158,8 +158,7 @@ if df.empty:
 st.subheader("Tipos de variables")
 st.write(df.dtypes.value_counts())
 
-st.markdown("""Se observa que de las 26 variables con las que cuenta la base, 16 son categóricas y 10 son numéricas. Adicionalmente no se evidencian valores faltantes en ningun registro por lo que no hay necesidad de imputar ni eliminar variables.
-""")
+st.markdown("""Se observa que de las 26 variables con las que cuenta la base, 16 son categóricas y 10 son numéricas. Adicionalmente no se evidencian valores faltantes en ningun registro por lo que no hay necesidad de imputar ni eliminar variables.""")
 
 st.markdown("---")
 st.header("2. Análisis exploratorio de datos")
