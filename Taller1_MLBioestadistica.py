@@ -245,7 +245,6 @@ with tab1:
     st.pyplot(fig)
     st.text("Como se puede ver en los diagramas de cajas y bigotes, las 10 variables numéricas contenidas en la base de datos no cuentan con valores atípicos.")
     
-    
     st.subheader("Balance de la variable dependiente (dry eye disease)")
     
     # Porcentaje
@@ -258,7 +257,6 @@ with tab1:
     ax.set_title("Distribución de la variable objetivo (Dry Eye Disease)")
     st.pyplot(fig)
     st.text("Para esta actividad vamos a tomar como variable objetivo (Dry Eye Disease) que significa que el sujeto tiene la enfermedad del ojo seco. donde Y es si y N es no. Se observa que existen más casos en la base donde el sujeto tiene la enfermedad por lo que podría ser de gran ayuda a la hora de realizar el modelo de clasificación.")
-    
     
     st.subheader("Correlaciones")
     
@@ -292,7 +290,7 @@ with tab1:
     
     # Visualización correlaciones numéricas 
     fig, ax = plt.subplots(figsize=(8,5))
-    sns.heatmap(df[num_vars].corr(method="spearman"), annot=True, cmap="coolwarm")
+    sns.heatmap(df[num_vars].corr(method="spearman"), annot=True, cmap="coolwarm", annot_kws={"size": 6})
     ax.set_title("Matriz de correlación (Spearman)")
     st.pyplot(fig)
     
