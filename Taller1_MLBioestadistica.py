@@ -27,8 +27,6 @@ from sklearn.decomposition import PCA
 st.set_page_config(page_title="Taller1_MLBioestadística", layout="wide")
 st.title("Análisis, preprocesamiento y reducción de dimensionalidad Dry Eye Disease")
 
-tab1, tab2, tab3 = st.tabs(["📊 Exploración", "⚙️ Modelado", "📈 Resultados"])
-
 @st.cache_data
 def load_data():
     url = "https://raw.githubusercontent.com/andrews06ml/Taller1_MLBioestadistica/refs/heads/main/Dry_Eye_Dataset.csv"
@@ -37,6 +35,18 @@ def load_data():
 
 df = load_data()
 
+st.text("""
+El taller se encuentra organizado en las siguientes secciones:
+
+Usa las pestañas de abajo para ver la exploración de datos, las técnicas de 
+reducción de dimensionalidad y los selectores de variables para la base de datos Dry Eye Disease.
+
+Haz clic en la pestaña que quieras revisar del taller.
+""")
+
+tab1, tab2, tab3 = st.tabs(["📊 Exploración de datos", " ✅**Tarea 1 - ACP y MCA**", "✅**Tarea 2 - Aplicación de selectores**"])
+
+with tab1:
 st.dataframe(df, use_container_width=True)
 
 # Diccionario de códigos por variable categórica
@@ -334,3 +344,11 @@ X_train_cat, X_test_cat, y_train_cat, y_test_cat = train_test_split(X_cat, y, te
 st.write(f"Base, categórica: {X_train_cat.shape}")
 st.write(f"Base, numérica: {X_train_num.shape}")
 st.text("Se realizan los conjuntos de entrenamiento para las variables numéricas y categóricas distribuidos de la siguiente forma: 80% entrenamiento y 20% prueba")
+
+
+with tab2:
+st.subheader("")
+
+
+with tab3:
+st.subheader("")
