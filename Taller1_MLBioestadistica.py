@@ -37,21 +37,6 @@ df = load_data()
 
 st.dataframe(df, use_container_width=True)
 
-# Asignar condiciones
-# def assign_condition(row):
-#     if (row["BPXSY1"] >= 140 or row["BPXSY2"] >= 140 or 
-#         row["BPXDI1"] >= 90 or row["BPXDI2"] >= 90):
-#         return "hypertension"
-#     elif row["BMXBMI"] >= 30:
-#         return "diabetes"
-#     elif ((row["RIAGENDR"] == 1 and row["BMXWAIST"] > 102) or 
-#           (row["RIAGENDR"] == 2 and row["BMXWAIST"] > 88)):
-#         return "high cholesterol"
-#     else:
-#         return "healthy"
-
-# df["Condition"] = df.apply(assign_condition, axis=1)
-
 # Diccionario de códigos por variable categórica
 category_mappings = {
     "Gender": {
@@ -116,7 +101,6 @@ En cuanto a la salud visual, la base de datos contiene información sobre sínto
 Este conjunto de datos ofrece un panorama integral de factores fisiológicos, conductuales y ambientales, lo que lo convierte en una herramienta valiosa para identificar patrones, analizar relaciones y proponer estrategias de prevención y tratamiento en el ámbito de la salud visual.
 """)
 
-
 st.subheader("Resumen de datos")
 # Crear columnas para mostrar info_df y category_df lado a lado
 col1, col2 = st.columns(2)
@@ -172,7 +156,7 @@ if df.empty:
     st.stop()
 
 st.subheader("Tipos de variables")
-print(df.dtypes.value_counts())
+st.write(df.dtypes.value_counts())
 
 st.markdown("""Se observa que de las 26 variables con las que cuenta la base, 16 son categóricas y 10 son numéricas. Adicionalmente no se evidencian valores faltantes en ningun registro por lo que no hay necesidad de imputar ni eliminar variables.
 """)
@@ -245,21 +229,22 @@ for j in range(i + 1, len(axes)):
 
 plt.tight_layout()
 st.pyplot(fig)
-st.write("Como se puede ver en los diagramas de cajas y bigotes, las 10 variables numéricas contenidas en la base de datos no cuentan con valores atípicos.")
+st.text("Como se puede ver en los diagramas de cajas y bigotes, las 10 variables numéricas contenidas en la base de datos no cuentan con valores atípicos.")
+
 
 st.subheader("Balance de la variable dependiente (dry eye disease)")
 
-# Conteo absoluto
-print(df["Dry Eye Disease"].value_counts())
-
 # Porcentaje
-print(df["Dry Eye Disease"].value_counts(normalize=True) * 100)
+st.text("Porcentaje de pacientes por tipo de respuesta")
+st.write(df["Dry Eye Disease"].value_counts(normalize=True) * 100)
 
 # Visualización
-sns.countplot(x="Dry Eye Disease", data=df)
-plt.title("Distribución de la variable objetivo (Dry Eye Disease)")
-plt.show()
-st.write("Para esta actividad vamos a tomar como variable objetivo (Dry Eye Disease) que significa que el sujeto tiene la enfermedad del ojo seco. donde Y es si y N es no. Se observa que existen más casos en la base donde el sujeto tiene la enfermedad por lo que podría ser de gran ayuda a la hora de realizar el modelo de clasificación.")
+fig, ax = plt.subplots(figsize=(8, 6))
+sns.countplot(x="Dry Eye Disease", data=df, ax=ax)
+ax.set_title("Distribución de la variable objetivo (Dry Eye Disease)")
+st.pyplot(fig)
+st.text("Para esta actividad vamos a tomar como variable objetivo (Dry Eye Disease) que significa que el sujeto tiene la enfermedad del ojo seco. donde Y es si y N es no. Se observa que existen más casos en la base donde el sujeto tiene la enfermedad por lo que podría ser de gran ayuda a la hora de realizar el modelo de clasificación.")
+
 
 st.subheader("Correlaciones")
 
@@ -267,8 +252,8 @@ st.subheader("Correlaciones")
 num_vars = df.select_dtypes(include=[np.number]).columns
 cat_vars = df.select_dtypes(exclude=[np.number]).columns.drop("Dry Eye Disease", errors="ignore")
 
-print("Variables numéricas:", list(num_vars))
-print("Variables categóricas:", list(cat_vars))
+st.write("Variables numéricas:", list(num_vars))
+st.write("Variables categóricas:", list(cat_vars))
 
 # Correlación variables numéricas vs dry disease
 correlations = {}
@@ -277,8 +262,8 @@ for col in num_vars:
     correlations[col] = {"Spearman_corr": corr, "p-value": pval}
 
 cor_num = pd.DataFrame(correlations).T
-print("\nCorrelación con variables numéricas:")
-print(cor_num.sort_values("Spearman_corr", ascending=False))
+st.write("\nCorrelación con variables numéricas:")
+st.write(cor_num.sort_values("Spearman_corr", ascending=False))
 
 # Asociación variables categóricas vs dry disease
 assoc_cat = {}
@@ -288,14 +273,14 @@ for col in cat_vars:
     assoc_cat[col] = {"Chi2": chi2, "p-value": p}
 
 assoc_cat_df = pd.DataFrame(assoc_cat).T
-print("\nAsociación con variables categóricas:")
-print(assoc_cat_df.sort_values("p-value"))
+st.write("\nAsociación con variables categóricas:")
+st.write(assoc_cat_df.sort_values("p-value"))
 
 # Visualización correlaciones numéricas 
-plt.figure(figsize=(8,5))
+fig, ax = plt.subplots(figsize=(8,5))
 sns.heatmap(df[num_vars].corr(method="spearman"), annot=True, cmap="coolwarm")
-plt.title("Matriz de correlación (Spearman)")
-plt.show()
+ax.set_title("Matriz de correlación (Spearman)")
+st.pyplot(fig)
 
 # Visualización correlaciones categóricas
 def cramers_v(confusion_matrix):
@@ -320,10 +305,10 @@ for col1 in cat_vars:
 assoc_matrix = assoc_matrix.astype(float)
 
 # Heatmap
-plt.figure(figsize=(10,8))
+fig, ax = plt.subplot(figsize=(10,8))
 sns.heatmap(assoc_matrix, annot=True, cmap="coolwarm", vmin=0, vmax=1)
-plt.title("Mapa de calor de asociación (Cramer's V) entre variables categóricas")
-plt.show()
+ax.set_title("Mapa de calor de asociación (Cramer's V) entre variables categóricas")
+st.pyplot(fig)
 
 st.header("Separación del df y la variable a predecir")
 
@@ -342,5 +327,5 @@ X_train_num, X_test_num, y_train_num, y_test_num = train_test_split(X_num, y, te
 # Conjunto de entrenamiento y prueba categórico
 X_train_cat, X_test_cat, y_train_cat, y_test_cat = train_test_split(X_cat, y, test_size=0.2, random_state=42)
 
-print(f"Base, categórica: {X_train_cat.shape}")
-print(f"Base, numérica: {X_train_num.shape}")
+st.write(f"Base, categórica: {X_train_cat.shape}")
+st.write(f"Base, numérica: {X_train_num.shape}")
