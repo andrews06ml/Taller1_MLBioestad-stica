@@ -82,6 +82,7 @@ Incluye datos estructurados de personas entre 18 y 45 años, permitiendo investi
 El archivo contiene información de unas 20.000 personas (adolescentes, adultos de mediana edad y mayores) de ambos sexos. Incluye columnas como pasos diarios, tiempo de sueño, pulso, presión arterial, hábitos de alimentación y bebida, niveles de estrés, problemas médicos (ansiedad, hipertensión, asma, etc.) y medicamentos utilizados, además de atributos oculares básicos para predecir la DED. Está en formato CSV y puede aportar a diversos tipos de investigación médica relacionada con la salud ocular y los hábitos de las personas.
 
  ***Link con mayor información: [Enfermedad del Ojo seco](https://www.kaggle.com/datasets/dakshnagra/dry-eye-disease)***
+""")
 
 st.markdown("---")
 # Mostrar info y variables categóricas lado a lado
