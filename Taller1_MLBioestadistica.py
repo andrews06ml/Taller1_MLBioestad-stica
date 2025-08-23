@@ -290,7 +290,7 @@ with tab1:
     
     # Visualización correlaciones numéricas 
     fig, ax = plt.subplots(figsize=(8,5))
-    sns.heatmap(df[num_vars].corr(method="spearman"), annot=True, cmap="coolwarm", annot_kws={"size": 7})
+    sns.heatmap(df[num_vars].corr(method="spearman"), annot=True, cmap="coolwarm", annot_kws={"size": 6})
     ax.set_title("Matriz de correlación (Spearman)")
     st.pyplot(fig)
     
@@ -344,8 +344,66 @@ with tab1:
     st.text("Se realizan los conjuntos de entrenamiento para las variables numéricas y categóricas distribuidos de la siguiente forma: 80% entrenamiento y 20% prueba")
 
 with tab2:
-    st.subheader("")
+    st.subheader("Reducción de dimensionalidad con PCA para variables numéricas")
+    st.markdown("### Gráfica de número de componentes que explican más del 80% de la varianza acumulada")
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X_train_num)
+    
+    # PCA con todos los componentes
+    pca = PCA()
+    X_pca = pca.fit_transform(X_scaled)
+    
+    # Varianza acumulada
+    explained_var = np.cumsum(pca.explained_variance_ratio_)
 
+    fig, ax = plt.subplots(figsize=(8,5))
+    ax.plot(range(1, len(explained_var) + 1), explained_var, marker='o', linestyle='--')
+    ax.axhline(y=0.9, color='r', linestyle='-')
+    ax.set_xlabel('Número de componentes principales')
+    ax.set_ylabel('Varianza acumulada explicada')
+    ax.set_title('Varianza acumulada explicada por PCA')
+    ax.grid(True)
+    st.pyplot(fig)
+
+    st.markdown("### Gráfica de número de componentes que explican más del 80% de la varianza acumulada")
+    
+    fig, ax = plt.subplots(figsize=(8, 6))
+    
+    # Crear el scatterplot sobre el eje `ax`
+    sns.scatterplot(
+        x=X_pca[:, 0],
+        y=X_pca[:, 1],
+        hue=y_train_num,
+        palette='Set1',
+        alpha=0.7,
+        ax=ax)
+
+    ax.set_xlabel('PC1')
+    ax.set_ylabel('PC2')
+    ax.set_title('Scatterplot PC1 vs PC2')
+    ax.legend(title='Clase', labels=['Enfermo', 'No enfermo'])
+    st.pyplot(fig)
+
+    st.markdown("### Loadings")
+    # Conocer los nombres de las columnas de X_train
+    columnas_numericas = X_train_num.columns.tolist()
+    
+    # Loadings (cargas) de las variables en las PCs
+    loadings = pd.DataFrame(pca.components_.T, columns=[f'PC{i+1}' for i in range(pca.n_components_)], index=columnas_numericas)
+    
+    fig, ax = plt.subplots(figsize=(12,8))
+    sns.heatmap(loadings.iloc[:,:11], annot=True, cmap='coolwarm', center=0, ax=ax)
+    ax.set_title('Heatmap de loadings (primeras 10 PCs)')
+    st.pyplot(fig)
+    
+    # Aplicar PCA
+    pca = PCA(n_components=0.90)  # Selecciona número mínimo de PCs que expliquen 90% de la varianza
+    X_pca = pca.fit_transform(X_scaled)
+    
+    print(f"Número de componentes principales para explicar 90% varianza: {pca.n_components_}")
+    print(f"Varianza explicada acumulada por estas componentes: {sum(pca.explained_variance_ratio_):.4f}")
+
+    st.subheader("Reducción de dimensionalidad con MCA para variables categóricas")
 
 with tab3:
     st.subheader("")
