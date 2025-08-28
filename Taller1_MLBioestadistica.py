@@ -528,44 +528,44 @@ with tab3:
     
     # --- 2. Selección incrustada (RandomForest feature_importances_) ---
     
-    #rf = RandomForestClassifier(n_estimators=100, random_state=42)
-    #rf.fit(X_train_processed_filter, y_train)
+    rf = RandomForestClassifier(n_estimators=100, random_state=42)
+    rf.fit(X_train_processed_filter, y_train)
     
-    #importances_embedded = rf.feature_importances_
-    #indices_embedded = np.argsort(importances_embedded)[::-1]
-    #sorted_importances_embedded = importances_embedded[indices_embedded]
-    #sorted_features_embedded = features[indices_embedded]
+    importances_embedded = rf.feature_importances_
+    indices_embedded = np.argsort(importances_embedded)[::-1]
+    sorted_importances_embedded = importances_embedded[indices_embedded]
+    sorted_features_embedded = features[indices_embedded]
     
-    #cumulative_embedded = np.cumsum(sorted_importances_embedded) / np.sum(sorted_importances_embedded)
-    #cutoff_embedded = np.searchsorted(cumulative_embedded, 0.90) + 1
-    #selected_embedded = sorted_features_embedded[:cutoff_embedded]
+    cumulative_embedded = np.cumsum(sorted_importances_embedded) / np.sum(sorted_importances_embedded)
+    cutoff_embedded = np.searchsorted(cumulative_embedded, 0.90) + 1
+    selected_embedded = sorted_features_embedded[:cutoff_embedded]
     
     # --- 3. Selección por envoltura (RFECV con LogisticRegression) ---
     
     # Modelo base para RFECV
-    #model = LogisticRegression(max_iter=1000)
+    model = LogisticRegression(max_iter=1000)
     
-    #rfecv = RFECV(estimator=model, step=1, cv=5, scoring='accuracy')
-    #pipeline = Pipeline([('scaler', scaler), ('feature_selection', rfecv)])
-    #pipeline.fit(X_train_processed_filter, y_train)
+    rfecv = RFECV(estimator=model, step=1, cv=5, scoring='accuracy')
+    pipeline = Pipeline([('scaler', scaler), ('feature_selection', rfecv)])
+    pipeline.fit(X_train_processed_filter, y_train)
     
     # Obtener las features seleccionadas por RFECV
-    #selected_wrap = X_train_processed_filter.columns[rfecv.support_]
+    selected_wrap = X_train_processed_filter.columns[rfecv.support_]
     
     # Obtener los coeficientes del modelo ajustado por RFECV para las variables seleccionadas
-    #coefs = rfecv.estimator_.coef_.flatten()
+    coefs = rfecv.estimator_.coef_.flatten()
     
     # Ordenar las variables seleccionadas por el valor absoluto de sus coeficientes
-    #indices_wrap = np.argsort(np.abs(coefs))[::-1]
-    #abs_coefs_sorted = np.abs(coefs)[indices_wrap]
-    #selected_wrap_sorted_by_coefs = selected_wrap[indices_wrap]
+    indices_wrap = np.argsort(np.abs(coefs))[::-1]
+    abs_coefs_sorted = np.abs(coefs)[indices_wrap]
+    selected_wrap_sorted_by_coefs = selected_wrap[indices_wrap]
     
     # Calcular la suma acumulada de los valores absolutos de los coeficientes
-    #cumulative_wrap = np.cumsum(abs_coefs_sorted) / np.sum(abs_coefs_sorted)
+    cumulative_wrap = np.cumsum(abs_coefs_sorted) / np.sum(abs_coefs_sorted)
     
     # Seleccionar variables hasta que la suma acumulada alcance 0.9 (90%)
-    #cutoff_wrap = np.searchsorted(cumulative_wrap, 0.90) + 1
-    #selected_wrap_90 = selected_wrap_sorted_by_coefs[:cutoff_wrap]
+    cutoff_wrap = np.searchsorted(cumulative_wrap, 0.90) + 1
+    selected_wrap_90 = selected_wrap_sorted_by_coefs[:cutoff_wrap]
     
     # --- Resultados ---
     #print("Número de variables para 90% importancia:")
