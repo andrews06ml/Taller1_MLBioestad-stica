@@ -1,13 +1,13 @@
 import numpy as np
 import streamlit as st
 import pandas as pd
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, MinMaxScaler, LabelEncoder
 from sklearn.impute import SimpleImputer
 from sklearn.decomposition import PCA
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.feature_selection import SelectKBest, f_classif, RFE, chi2
+from sklearn.feature_selection import SelectKBest, f_classif, RFE, chi2, RFECV
 from sklearn.pipeline import Pipeline
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
@@ -405,5 +405,219 @@ with tab2:
 
     st.subheader("Reducción de dimensionalidad con MCA para variables categóricas")
 
+    # Copiamos el DataFrame para no modificar el original
+    X_train_cat_encoded = X_train_cat.copy()
+
+    # Aplicamos onehotencoder a cada columna categórica
+    X_train_cat_encoded = pd.get_dummies(X_train_cat, drop_first=False)
+
+    # Aplicar MCA
+    mca = prince.MCA(n_components=14,random_state=42)
+    mca = mca.fit(X_train_cat_encoded)
+
+    # Valores singulares y autovalores
+    # Varianza acumulado
+    cum_explained_var = mca.eigenvalues_summary['% of variance (cumulative)']
+    cum_explained_var = cum_explained_var.str.rstrip("%").astype(float)
+    cum_explained_var = cum_explained_var / 100
+
+    # Graficar varianza acumulada
+    fig, ax = plt.subplots(figsize=(8,5))
+    ax.plot(range(1, len(cum_explained_var)+1), cum_explained_var, marker='o', linestyle='--')
+    ax.axhline(y=0.9, color='r', linestyle='-')
+    ax.set_xlabel('Dimensiones MCA')
+    ax.set_ylabel('Varianza acumulada explicada')
+    ax.set_title('Varianza acumulada explicada por MCA')
+    ax.grid(True)
+    st.pyplot(fig)
+
+    # Coordenadas individuos (2 primeras dimensiones)
+    coords = mca.row_coordinates(X_train_cat_encoded)
+
+    fig, ax = plt.subplots(figsize=(8,6))
+    sns.scatterplot(x=coords[0], y=coords[1], hue=y_train_cat, palette='Set1', alpha=0.7, ax=ax)
+    ax.set_xlabel('Dimensión 1')
+    ax.set_ylabel('Dimensión 2')
+    ax.set_title('Scatterplot MCA Dim 1 vs Dim 2')
+    ax.legend(title='Clase', labels=['Y', 'N']) # Ajustar etiquetas de leyenda
+    st.pyplot(fig)
+
+    # Coordenadas de las columnas (variables categóricas)
+    loadings_cat = mca.column_coordinates(X_train_cat_encoded).iloc[:, :2]
+    
+    # Calcular contribución de cada variable (cuadrado / suma por dimensión)
+    loadings_sq = loadings_cat ** 2
+    contrib_cat = loadings_sq.div(loadings_sq.sum(axis=0), axis=1)
+    
+    # Sumar contribuciones por variable
+    contrib_var = contrib_cat.sum(axis=1).sort_values(ascending=False)
+    
+    # Graficar contribuciones variables
+    fig, ax = plt.subplots(figsize=(12, 6))
+    contrib_var.plot(kind='bar', color='teal', ax=ax)
+    ax.set_ylabel('Contribución total a Dim 1 y 2')
+    ax.set_title('Contribución de variables a las primeras 2 dimensiones MCA')
+    ax.tick_params(rotation=45, axis = "x")
+    fig.tight_layout()
+    st.pyplot(fig)
+
+    st.markdown("### Conclusión")
+    st.markdown(""" Despues de realizar técnicas de reducción de dimensionalidad tanto para variables numéricas (ACP), como para variables categóricas (MCA), se concluye que:
+
+    - Para el caso del análisis de componentes principales (ACP), se requieren 11 componentes principales para explicar más del 90% de la varianza de las variables numéricas. Esto sugiere que la estructura de las variables numéricas es relativamente compleja, y que existe información relevante distribuida en múltiples dimensiones.
+
+    - Con respecto al análisis de correspondencias múltiples (MCA) mostró que se requieren 13 dimensiones para explicar más del 90% de la varianza de las variables categóricas. Esto indica que las variables tienen información bastante diversa y no estan muy correlacionadas.
+
+    Teniendo en cuenta el resultado propuesto para el ejercicio, se realiza la combinación de las 11 componentes y las 13 dimensiones en una sola base de datos con el objetivo de posteriormente hacer un modelo de clasificación para la variable "Dry Eye Disease" que cuente con lo más relevante de ambos tipos de variables.
+    """)
+
+    st.markdown("### Paso final - Concatenar los componentes con las dimensiones para crear la base de datos final")
+
+    # Concatenar los componentes principales con las dimensiones
+    X_reduced = np.hstack((X_pca, coords.iloc[:,0:13]))
+
+    # convertir array en dataframe
+    X_reduced_df = pd.DataFrame(X_reduced, columns=[f'PC{i+1}' for i in range(pca.n_components_)] + [f'MCA{i}' for i in range(1,14)])
+
+    X_reduced_df
+
 with tab3:
-    st.subheader("")
+    st.subheader("Selector por filtrado (chi2), incrustada (Randomforest), envoltura (Regresion logistica)")
+
+    # 0. escalar y convertir las variables de la base de datos de entrenamiento
+    num_features = X_train_num.columns.tolist()
+    cat_features = X_train_cat.columns.tolist()
+    
+    # Codificar Y/N a 0/1 para variables categóricas
+    X_encoded = X.copy()
+    for col in X_encoded.select_dtypes(include=['object', 'category']):
+        if X_encoded[col].nunique() == 2:  # Solo codificar variables binarias
+            X_encoded[col] = X_encoded[col].map({'N': 0, 'Y': 1, 'M': 0 , 'F': 1})
+    
+    # Separar la base en entrenamiento y prueba después de codificar
+    X_train, X_test, y_train, y_test = train_test_split(X_encoded, y, test_size=0.2, random_state=42)
+    
+    # Definir las listas de variables numéricas y categóricas
+    num_features = X_train.select_dtypes(include=[np.number]).columns.tolist()
+    cat_features = X_train.select_dtypes(exclude=[np.number]).columns.tolist()
+    
+    # --- 1. Selección por filtrado (SelectKBest con chi2) ---
+    # Aplicar MinMaxScaler solo a las columnas numéricas de X_train
+    X_train_num_scaled = MinMaxScaler().fit_transform(X_train[num_features])
+    X_train_num_scaled_df = pd.DataFrame(X_train_num_scaled, columns=num_features, index=X_train.index)
+    
+    # Combinar con las variables categóricas codificadas (que ya son 0 o 1)
+    X_train_processed_filter = pd.concat([X_train_num_scaled_df, X_train[cat_features]], axis=1)
+    
+    # Aplicar SelectKBest con chi2 sobre el dataframe preprocesado
+    selector = SelectKBest(score_func=chi2, k="all")
+    
+    # Asegurarse que y_train es numérica para chi2
+    selector.fit(X_train_processed_filter, y_train.map({'N': 0, 'Y': 1}))
+    
+    scores_filter = selector.scores_
+    features = X_train_processed_filter.columns
+    
+    indices_filter = np.argsort(scores_filter)[::-1]
+    sorted_scores_filter = scores_filter[indices_filter]
+    sorted_features_filter = features[indices_filter]
+    
+    cumulative_filter = np.cumsum(sorted_scores_filter) / np.sum(sorted_scores_filter)
+    cutoff_filter = np.searchsorted(cumulative_filter, 0.90) + 1
+    selected_filter = sorted_features_filter[:cutoff_filter]
+    
+    # --- 2. Selección incrustada (RandomForest feature_importances_) ---
+    
+    rf = RandomForestClassifier(n_estimators=100, random_state=42)
+    rf.fit(X_train_processed_filter, y_train)
+    
+    importances_embedded = rf.feature_importances_
+    indices_embedded = np.argsort(importances_embedded)[::-1]
+    sorted_importances_embedded = importances_embedded[indices_embedded]
+    sorted_features_embedded = features[indices_embedded]
+    
+    cumulative_embedded = np.cumsum(sorted_importances_embedded) / np.sum(sorted_importances_embedded)
+    cutoff_embedded = np.searchsorted(cumulative_embedded, 0.90) + 1
+    selected_embedded = sorted_features_embedded[:cutoff_embedded]
+    
+    # --- 3. Selección por envoltura (RFECV con LogisticRegression) ---
+    
+    # Modelo base para RFECV
+    model = LogisticRegression(max_iter=1000)
+    
+    rfecv = RFECV(estimator=model, step=1, cv=5, scoring='accuracy')
+    pipeline = Pipeline([('scaler', scaler), ('feature_selection', rfecv)])
+    pipeline.fit(X_train_processed_filter, y_train)
+    
+    # Obtener las features seleccionadas por RFECV
+    selected_wrap = X_train_processed_filter.columns[rfecv.support_]
+    
+    # Obtener los coeficientes del modelo ajustado por RFECV para las variables seleccionadas
+    coefs = rfecv.estimator_.coef_.flatten()
+    
+    # Ordenar las variables seleccionadas por el valor absoluto de sus coeficientes
+    indices_wrap = np.argsort(np.abs(coefs))[::-1]
+    abs_coefs_sorted = np.abs(coefs)[indices_wrap]
+    selected_wrap_sorted_by_coefs = selected_wrap[indices_wrap]
+    
+    # Calcular la suma acumulada de los valores absolutos de los coeficientes
+    cumulative_wrap = np.cumsum(abs_coefs_sorted) / np.sum(abs_coefs_sorted)
+    
+    # Seleccionar variables hasta que la suma acumulada alcance 0.9 (90%)
+    cutoff_wrap = np.searchsorted(cumulative_wrap, 0.90) + 1
+    selected_wrap_90 = selected_wrap_sorted_by_coefs[:cutoff_wrap]
+    
+    # --- Resultados ---
+    print("Número de variables para 90% importancia:")
+    print(f"Filtrado (chi2): {len(selected_filter)} variables")
+    print(f"Incrustado (Random Forest): {len(selected_embedded)} variables")
+    print(f"Envoltura (RFECV coef): {len(selected_wrap_90)} variables")
+    
+    print("\nVariables seleccionadas por filtrado (chi2, 90% acumulado):")
+    print(selected_filter.tolist())
+    
+    print("\nVariables seleccionadas por incrustado (Random Forest, 90% acumulado):")
+    print(selected_embedded.tolist())
+    
+    print("\nVariables seleccionadas por envoltura (RFECV coef, 90% acumulado):")
+    print(selected_wrap_90.tolist())
+    
+    # --- Graficas comparativas ---
+    fig, axes = plt.subplots(1, 3, figsize=(18, 5)) 
+    
+    axes[0].bar(range(len(sorted_scores_filter)), sorted_scores_filter, color='skyblue')
+    axes[0].set_xticks(range(len(sorted_features_filter)), sorted_features_filter, rotation=90)
+    axes[0].set_ylabel("Puntuación (chi2)")
+    axes[0].set_title('Filtrado (SelectKBest chi2)')
+    axes[0].axvline(cutoff_filter-1, color='red', linestyle='--', label='90% acumulado')
+    axes[0].legend()
+    
+    axes[1].bar(range(len(sorted_importances_embedded)), sorted_importances_embedded, color='lightgreen')
+    axes[1].set_xticks(range(len(sorted_features_embedded)), sorted_features_embedded, rotation=90)
+    axes[1].set_ylabel("Importancia de Característica")
+    axes[1].set_title('Incrustado (Random Forest)')
+    axes[1].axvline(cutoff_embedded-1, color='red', linestyle='--', label='90% acumulado')
+    axes[1].legend()
+    
+    axes[2].bar(range(len(abs_coefs_sorted)), abs_coefs_sorted, color='salmon')
+    axes[2].set_xticks(range(len(selected_wrap_sorted_by_coefs)), selected_wrap_sorted_by_coefs, rotation=90)
+    axes[2].set_ylabel("Valor absoluto del Coeficiente")
+    axes[2].set_title('Envoltura (RFECV coef)')
+    axes[2].axvline(cutoff_wrap-1, color='red', linestyle='--', label='90% acumulado')
+    axes[2].legend()
+    
+    fig.tight_layout()
+    st.pyplot(fig)
+
+    st.markdown("### Conclusión")
+
+    st.markdown("""
+    Teniendo en cuenta los tres métodos de selección de características de la imagen anterior (Filtrado con Chi2, Random Forest e Envoltura con RFECV), podemos concluir que existe una fuerte coincidencia entre los tres métodos en que las variables "Discomfort Eye-strain", "Redness in eye" y "Itchiness/Irritation in eye" son las más relevantes. Estas podrían considerarse las variables clave a conservar o utilizar para la realización de los modelos de clasificación para la variable "Dry Eye Disease".
+
+    Aunque el método de Random Forest sugiere otras variables con cierta importancia, los métodos de filtrado y envoltura indican que esas tres variables explican al menos el 90% de la varianza relevante, por lo tanto y siguiendo el principio de parsimonia, se opta por generar una base de datos con sólo esas tres variables ya que se prefiere un modelo más simple si su rendimiento es similar al de uno más complejo.
+    """)
+
+    # Base de datos seleccionando las variables que aparecen en la gráfica de chi2 y de regresión logistica
+    Base_X_train_final = X_train_processed_filter[selected_filter.tolist()]
+    
+    Base_X_train_final
