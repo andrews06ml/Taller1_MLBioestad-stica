@@ -457,7 +457,7 @@ with tab2:
     contrib_var.plot(kind='bar', color='teal', ax=ax)
     ax.set_ylabel('Contribución total a Dim 1 y 2')
     ax.set_title('Contribución de variables a las primeras 2 dimensiones MCA')
-    ax.tick_params(rotation=45, axis = "x")
+    ax.tick_params(rotation=90, axis = "x")
     fig.tight_layout()
     st.pyplot(fig)
 
@@ -568,19 +568,19 @@ with tab3:
     selected_wrap_90 = selected_wrap_sorted_by_coefs[:cutoff_wrap]
     
     # --- Resultados ---
-    #print("Número de variables para 90% importancia:")
-    #print(f"Filtrado (chi2): {len(selected_filter)} variables")
-    #print(f"Incrustado (Random Forest): {len(selected_embedded)} variables")
-    #print(f"Envoltura (RFECV coef): {len(selected_wrap_90)} variables")
+    print("Número de variables para 90% importancia:")
+    print(f"Filtrado (chi2): {len(selected_filter)} variables")
+    print(f"Incrustado (Random Forest): {len(selected_embedded)} variables")
+    print(f"Envoltura (RFECV coef): {len(selected_wrap_90)} variables")
     
-    #print("\nVariables seleccionadas por filtrado (chi2, 90% acumulado):")
-    #print(selected_filter.tolist())
+    print("\nVariables seleccionadas por filtrado (chi2, 90% acumulado):")
+    print(selected_filter.tolist())
     
-    #print("\nVariables seleccionadas por incrustado (Random Forest, 90% acumulado):")
-    #print(selected_embedded.tolist())
+    print("\nVariables seleccionadas por incrustado (Random Forest, 90% acumulado):")
+    print(selected_embedded.tolist())
     
-    #print("\nVariables seleccionadas por envoltura (RFECV coef, 90% acumulado):")
-    #print(selected_wrap_90.tolist())
+    print("\nVariables seleccionadas por envoltura (RFECV coef, 90% acumulado):")
+    print(selected_wrap_90.tolist())
     
     # --- Graficas comparativas ---
     #fig, axes = plt.subplots(1, 3, figsize=(18, 5)) 
