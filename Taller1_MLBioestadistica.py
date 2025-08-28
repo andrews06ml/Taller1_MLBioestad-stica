@@ -518,7 +518,7 @@ with tab3:
     # Asegurarse que y_train es numérica para chi2
     #selector.fit(X_train_processed_filter, y_train.map({'N': 0, 'Y': 1}))
     
-    scores_filter = selector.scores_
+    #scores_filter = selector.scores_
     #features = X_train_processed_filter.columns
     
     #indices_filter = np.argsort(scores_filter)[::-1]
