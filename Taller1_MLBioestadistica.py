@@ -281,8 +281,8 @@ with tab1:
     assoc_cat = {}
     for col in cat_vars:
         table = pd.crosstab(df[col], df['Dry Eye Disease'])
-        chi2, p, dof, expected = chi2_contingency(table)
-        assoc_cat[col] = {"Chi2": chi2, "p-value": p}
+        chi2_cont, p, dof, expected = chi2_contingency(table)
+        assoc_cat[col] = {"Chi2_cont": chi2_cont, "p-value": p}
     
     assoc_cat_df = pd.DataFrame(assoc_cat).T
     st.write("\nAsociación con variables categóricas:")
@@ -296,9 +296,9 @@ with tab1:
     
     # Visualización correlaciones categóricas
     def cramers_v(confusion_matrix):
-        chi2 = chi2_contingency(confusion_matrix)[0]
+        chi2_cont = chi2_contingency(confusion_matrix)[0]
         n = confusion_matrix.sum().sum()
-        phi2 = chi2 / n
+        phi2 = chi2_cont / n
         r, k = confusion_matrix.shape
         phi2corr = max(0, phi2 - ((k-1)*(r-1))/(n-1))
         rcorr = r - ((r-1)**2)/(n-1)
