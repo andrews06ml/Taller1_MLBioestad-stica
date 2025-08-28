@@ -518,13 +518,13 @@ with tab3:
     scores_filter = selector.scores_
     features = X_train_processed_filter.columns
     
-    #indices_filter = np.argsort(scores_filter)[::-1]
-    #sorted_scores_filter = scores_filter[indices_filter]
-    #sorted_features_filter = features[indices_filter]
+    indices_filter = np.argsort(scores_filter)[::-1]
+    sorted_scores_filter = scores_filter[indices_filter]
+    sorted_features_filter = features[indices_filter]
     
-    #cumulative_filter = np.cumsum(sorted_scores_filter) / np.sum(sorted_scores_filter)
-    #cutoff_filter = np.searchsorted(cumulative_filter, 0.90) + 1
-    #selected_filter = sorted_features_filter[:cutoff_filter]
+    cumulative_filter = np.cumsum(sorted_scores_filter) / np.sum(sorted_scores_filter)
+    cutoff_filter = np.searchsorted(cumulative_filter, 0.90) + 1
+    selected_filter = sorted_features_filter[:cutoff_filter]
     
     # --- 2. Selección incrustada (RandomForest feature_importances_) ---
     
