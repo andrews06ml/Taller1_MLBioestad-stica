@@ -508,23 +508,26 @@ with tab3:
     
     # Combinar con las variables categóricas codificadas (que ya son 0 o 1)
     X_train_processed_filter = pd.concat([X_train_num_scaled_df, X_train[cat_features]], axis=1)
+
+    X_train_processed_filter
+    y_train
     
     # Aplicar SelectKBest con chi2 sobre el dataframe preprocesado
-    selector = SelectKBest(score_func=chi2, k="all")
+    #selector = SelectKBest(score_func=chi2, k="all")
     
     # Asegurarse que y_train es numérica para chi2
-    selector.fit(X_train_processed_filter, y_train.map({'N': 0, 'Y': 1}))
+    #selector.fit(X_train_processed_filter, y_train.map({'N': 0, 'Y': 1}))
     
     scores_filter = selector.scores_
-    features = X_train_processed_filter.columns
+    #features = X_train_processed_filter.columns
     
-    indices_filter = np.argsort(scores_filter)[::-1]
-    sorted_scores_filter = scores_filter[indices_filter]
-    sorted_features_filter = features[indices_filter]
+    #indices_filter = np.argsort(scores_filter)[::-1]
+    #sorted_scores_filter = scores_filter[indices_filter]
+    #sorted_features_filter = features[indices_filter]
     
-    cumulative_filter = np.cumsum(sorted_scores_filter) / np.sum(sorted_scores_filter)
-    cutoff_filter = np.searchsorted(cumulative_filter, 0.90) + 1
-    selected_filter = sorted_features_filter[:cutoff_filter]
+    #cumulative_filter = np.cumsum(sorted_scores_filter) / np.sum(sorted_scores_filter)
+    #cutoff_filter = np.searchsorted(cumulative_filter, 0.90) + 1
+    #selected_filter = sorted_features_filter[:cutoff_filter]
     
     # --- 2. Selección incrustada (RandomForest feature_importances_) ---
     
