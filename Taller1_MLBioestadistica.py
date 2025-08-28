@@ -503,111 +503,111 @@ with tab3:
     
     # --- 1. Selección por filtrado (SelectKBest con chi2) ---
     # Aplicar MinMaxScaler solo a las columnas numéricas de X_train
-    X_train_num_scaled = MinMaxScaler().fit_transform(X_train[num_features])
-    X_train_num_scaled_df = pd.DataFrame(X_train_num_scaled, columns=num_features, index=X_train.index)
+    #X_train_num_scaled = MinMaxScaler().fit_transform(X_train[num_features])
+    #X_train_num_scaled_df = pd.DataFrame(X_train_num_scaled, columns=num_features, index=X_train.index)
     
     # Combinar con las variables categóricas codificadas (que ya son 0 o 1)
-    X_train_processed_filter = pd.concat([X_train_num_scaled_df, X_train[cat_features]], axis=1)
+    #X_train_processed_filter = pd.concat([X_train_num_scaled_df, X_train[cat_features]], axis=1)
     
     # Aplicar SelectKBest con chi2 sobre el dataframe preprocesado
-    selector = SelectKBest(score_func=chi2, k="all")
+   # selector = SelectKBest(score_func=chi2, k="all")
     
     # Asegurarse que y_train es numérica para chi2
-    selector.fit(X_train_processed_filter, y_train.map({'N': 0, 'Y': 1}))
+    #selector.fit(X_train_processed_filter, y_train.map({'N': 0, 'Y': 1}))
     
-    scores_filter = selector.scores_
-    features = X_train_processed_filter.columns
+    #scores_filter = selector.scores_
+    #features = X_train_processed_filter.columns
     
-    indices_filter = np.argsort(scores_filter)[::-1]
-    sorted_scores_filter = scores_filter[indices_filter]
-    sorted_features_filter = features[indices_filter]
+    #indices_filter = np.argsort(scores_filter)[::-1]
+    #sorted_scores_filter = scores_filter[indices_filter]
+    #sorted_features_filter = features[indices_filter]
     
-    cumulative_filter = np.cumsum(sorted_scores_filter) / np.sum(sorted_scores_filter)
-    cutoff_filter = np.searchsorted(cumulative_filter, 0.90) + 1
-    selected_filter = sorted_features_filter[:cutoff_filter]
+    #cumulative_filter = np.cumsum(sorted_scores_filter) / np.sum(sorted_scores_filter)
+    #cutoff_filter = np.searchsorted(cumulative_filter, 0.90) + 1
+    #selected_filter = sorted_features_filter[:cutoff_filter]
     
     # --- 2. Selección incrustada (RandomForest feature_importances_) ---
     
-    rf = RandomForestClassifier(n_estimators=100, random_state=42)
-    rf.fit(X_train_processed_filter, y_train)
+    #rf = RandomForestClassifier(n_estimators=100, random_state=42)
+    #rf.fit(X_train_processed_filter, y_train)
     
-    importances_embedded = rf.feature_importances_
-    indices_embedded = np.argsort(importances_embedded)[::-1]
-    sorted_importances_embedded = importances_embedded[indices_embedded]
-    sorted_features_embedded = features[indices_embedded]
+    #importances_embedded = rf.feature_importances_
+    #indices_embedded = np.argsort(importances_embedded)[::-1]
+    #sorted_importances_embedded = importances_embedded[indices_embedded]
+    #sorted_features_embedded = features[indices_embedded]
     
-    cumulative_embedded = np.cumsum(sorted_importances_embedded) / np.sum(sorted_importances_embedded)
-    cutoff_embedded = np.searchsorted(cumulative_embedded, 0.90) + 1
-    selected_embedded = sorted_features_embedded[:cutoff_embedded]
+    #cumulative_embedded = np.cumsum(sorted_importances_embedded) / np.sum(sorted_importances_embedded)
+    #cutoff_embedded = np.searchsorted(cumulative_embedded, 0.90) + 1
+    #selected_embedded = sorted_features_embedded[:cutoff_embedded]
     
     # --- 3. Selección por envoltura (RFECV con LogisticRegression) ---
     
     # Modelo base para RFECV
-    model = LogisticRegression(max_iter=1000)
+    #model = LogisticRegression(max_iter=1000)
     
-    rfecv = RFECV(estimator=model, step=1, cv=5, scoring='accuracy')
-    pipeline = Pipeline([('scaler', scaler), ('feature_selection', rfecv)])
-    pipeline.fit(X_train_processed_filter, y_train)
+    #rfecv = RFECV(estimator=model, step=1, cv=5, scoring='accuracy')
+    #pipeline = Pipeline([('scaler', scaler), ('feature_selection', rfecv)])
+    #pipeline.fit(X_train_processed_filter, y_train)
     
     # Obtener las features seleccionadas por RFECV
-    selected_wrap = X_train_processed_filter.columns[rfecv.support_]
+    #selected_wrap = X_train_processed_filter.columns[rfecv.support_]
     
     # Obtener los coeficientes del modelo ajustado por RFECV para las variables seleccionadas
-    coefs = rfecv.estimator_.coef_.flatten()
+    #coefs = rfecv.estimator_.coef_.flatten()
     
     # Ordenar las variables seleccionadas por el valor absoluto de sus coeficientes
-    indices_wrap = np.argsort(np.abs(coefs))[::-1]
-    abs_coefs_sorted = np.abs(coefs)[indices_wrap]
-    selected_wrap_sorted_by_coefs = selected_wrap[indices_wrap]
+    #indices_wrap = np.argsort(np.abs(coefs))[::-1]
+    #abs_coefs_sorted = np.abs(coefs)[indices_wrap]
+    #selected_wrap_sorted_by_coefs = selected_wrap[indices_wrap]
     
     # Calcular la suma acumulada de los valores absolutos de los coeficientes
-    cumulative_wrap = np.cumsum(abs_coefs_sorted) / np.sum(abs_coefs_sorted)
+    #cumulative_wrap = np.cumsum(abs_coefs_sorted) / np.sum(abs_coefs_sorted)
     
     # Seleccionar variables hasta que la suma acumulada alcance 0.9 (90%)
-    cutoff_wrap = np.searchsorted(cumulative_wrap, 0.90) + 1
-    selected_wrap_90 = selected_wrap_sorted_by_coefs[:cutoff_wrap]
+    #cutoff_wrap = np.searchsorted(cumulative_wrap, 0.90) + 1
+    #selected_wrap_90 = selected_wrap_sorted_by_coefs[:cutoff_wrap]
     
     # --- Resultados ---
-    print("Número de variables para 90% importancia:")
-    print(f"Filtrado (chi2): {len(selected_filter)} variables")
-    print(f"Incrustado (Random Forest): {len(selected_embedded)} variables")
-    print(f"Envoltura (RFECV coef): {len(selected_wrap_90)} variables")
+    #print("Número de variables para 90% importancia:")
+    #print(f"Filtrado (chi2): {len(selected_filter)} variables")
+    #print(f"Incrustado (Random Forest): {len(selected_embedded)} variables")
+    #print(f"Envoltura (RFECV coef): {len(selected_wrap_90)} variables")
     
-    print("\nVariables seleccionadas por filtrado (chi2, 90% acumulado):")
-    print(selected_filter.tolist())
+    #print("\nVariables seleccionadas por filtrado (chi2, 90% acumulado):")
+    #print(selected_filter.tolist())
     
-    print("\nVariables seleccionadas por incrustado (Random Forest, 90% acumulado):")
-    print(selected_embedded.tolist())
+    #print("\nVariables seleccionadas por incrustado (Random Forest, 90% acumulado):")
+    #print(selected_embedded.tolist())
     
-    print("\nVariables seleccionadas por envoltura (RFECV coef, 90% acumulado):")
-    print(selected_wrap_90.tolist())
+    #print("\nVariables seleccionadas por envoltura (RFECV coef, 90% acumulado):")
+    #print(selected_wrap_90.tolist())
     
     # --- Graficas comparativas ---
-    fig, axes = plt.subplots(1, 3, figsize=(18, 5)) 
+    #fig, axes = plt.subplots(1, 3, figsize=(18, 5)) 
     
-    axes[0].bar(range(len(sorted_scores_filter)), sorted_scores_filter, color='skyblue')
-    axes[0].set_xticks(range(len(sorted_features_filter)), sorted_features_filter, rotation=90)
-    axes[0].set_ylabel("Puntuación (chi2)")
-    axes[0].set_title('Filtrado (SelectKBest chi2)')
-    axes[0].axvline(cutoff_filter-1, color='red', linestyle='--', label='90% acumulado')
-    axes[0].legend()
+    #axes[0].bar(range(len(sorted_scores_filter)), sorted_scores_filter, color='skyblue')
+    #axes[0].set_xticks(range(len(sorted_features_filter)), sorted_features_filter, rotation=90)
+    #axes[0].set_ylabel("Puntuación (chi2)")
+    #axes[0].set_title('Filtrado (SelectKBest chi2)')
+    #axes[0].axvline(cutoff_filter-1, color='red', linestyle='--', label='90% acumulado')
+    #axes[0].legend()
     
-    axes[1].bar(range(len(sorted_importances_embedded)), sorted_importances_embedded, color='lightgreen')
-    axes[1].set_xticks(range(len(sorted_features_embedded)), sorted_features_embedded, rotation=90)
-    axes[1].set_ylabel("Importancia de Característica")
-    axes[1].set_title('Incrustado (Random Forest)')
-    axes[1].axvline(cutoff_embedded-1, color='red', linestyle='--', label='90% acumulado')
-    axes[1].legend()
+    #axes[1].bar(range(len(sorted_importances_embedded)), sorted_importances_embedded, color='lightgreen')
+    #axes[1].set_xticks(range(len(sorted_features_embedded)), sorted_features_embedded, rotation=90)
+    #axes[1].set_ylabel("Importancia de Característica")
+    #axes[1].set_title('Incrustado (Random Forest)')
+    #axes[1].axvline(cutoff_embedded-1, color='red', linestyle='--', label='90% acumulado')
+    #axes[1].legend()
     
-    axes[2].bar(range(len(abs_coefs_sorted)), abs_coefs_sorted, color='salmon')
-    axes[2].set_xticks(range(len(selected_wrap_sorted_by_coefs)), selected_wrap_sorted_by_coefs, rotation=90)
-    axes[2].set_ylabel("Valor absoluto del Coeficiente")
-    axes[2].set_title('Envoltura (RFECV coef)')
-    axes[2].axvline(cutoff_wrap-1, color='red', linestyle='--', label='90% acumulado')
-    axes[2].legend()
+    #axes[2].bar(range(len(abs_coefs_sorted)), abs_coefs_sorted, color='salmon')
+    #axes[2].set_xticks(range(len(selected_wrap_sorted_by_coefs)), selected_wrap_sorted_by_coefs, rotation=90)
+    #axes[2].set_ylabel("Valor absoluto del Coeficiente")
+    #axes[2].set_title('Envoltura (RFECV coef)')
+    #axes[2].axvline(cutoff_wrap-1, color='red', linestyle='--', label='90% acumulado')
+    #axes[2].legend()
     
-    fig.tight_layout()
-    st.pyplot(fig)
+    #fig.tight_layout()
+    #st.pyplot(fig)
 
     st.markdown("### Conclusión")
 
@@ -618,6 +618,6 @@ with tab3:
     """)
 
     # Base de datos seleccionando las variables que aparecen en la gráfica de chi2 y de regresión logistica
-    Base_X_train_final = X_train_processed_filter[selected_filter.tolist()]
+    #Base_X_train_final = X_train_processed_filter[selected_filter.tolist()]
     
-    Base_X_train_final
+    #Base_X_train_final
