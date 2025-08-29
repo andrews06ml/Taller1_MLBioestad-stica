@@ -22,6 +22,25 @@ from sklearn.feature_selection import SequentialFeatureSelector
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split
 from sklearn.decomposition import PCA
+from imblearn.over_sampling import BorderlineSMOTE
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.metrics import (
+    classification_report, confusion_matrix, ConfusionMatrixDisplay,
+    roc_curve, auc, RocCurveDisplay
+)
+from sklearn.ensemble import (
+    RandomForestClassifier, GradientBoostingClassifier,
+    HistGradientBoostingClassifier, ExtraTreesClassifier
+)
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from imblearn.pipeline import Pipeline as ImbPipeline
+from scipy.stats import randint, uniform
+from sklearn.svm import SVC
+from sklearn.preprocessing import label_binarize
+import matplotlib
+from xgboost import XGBClassifier
 
 
 st.set_page_config(page_title="Taller1_MLBioestadística", layout="wide")
