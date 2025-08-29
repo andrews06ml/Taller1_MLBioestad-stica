@@ -63,7 +63,7 @@ reducción de dimensionalidad y los selectores de variables para la base de dato
 Haz clic en la pestaña que quieras revisar del taller.
 """)
 
-tab1, tab2, tab3, tab4 = st.tabs(["📊 Exploración de datos", " ✅**Tarea 1 - ACP y MCA**", "✅**Tarea 2 - Aplicación de selectores**"], "🔍**Modelos de clasificación**")
+tab1, tab2, tab3, tab4 = st.tabs(["📊 Exploración de datos", " ✅**Tarea 1 - ACP y MCA**", "✅**Tarea 2 - Aplicación de selectores**", "🔍**Modelos de clasificación**"])
 
 with tab1:
     st.dataframe(df, use_container_width=True)
