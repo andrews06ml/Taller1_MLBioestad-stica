@@ -702,7 +702,6 @@ with tab4:
     }
 
     def get_model_scores(estimator, X_test):
-        """Devuelve la probabilidad o decision_function para el modelo, o None si no existe."""
         try:
             clf = estimator.named_steps['classifier']
             
@@ -711,125 +710,121 @@ with tab4:
             elif hasattr(clf, "decision_function"):
                 return estimator.decision_function(X_test)
             else:
-                print(f"[WARNING] El modelo {clf.__class__.__name__} no tiene ni predict_proba ni decision_function.")
+                st.write(f"[WARNING] El modelo {clf.__class__.__name__} no tiene ni predict_proba ni decision_function.")
                 return None
         except Exception as e:
-            print(f"[ERROR] No se pudo obtener y_score: {e}")
+            st.write(f"[ERROR] No se pudo obtener y_score: {e}")
             return None
+
+    # Botón para iniciar entrenamiento
+    if st.button("🚀 Entrenar Modelos"):
+        with st.spinner("Entrenando modelos, por favor espera..."):
+            results = {}
     
-    # Para almacenar resultados
-    results = {}
+            for name, model in models.items():
+                st.markdown(f"### 🔍 Modelo: `{name}`")
     
-    for name, model in models.items():
-        print(f"\n===== Entrenando {name} =====")
+                pipeline = ImbPipeline(steps=[
+                    ('sample', BorderlineSMOTE()),
+                    ('classifier', model)
+                ])
     
-        # Definir pipeline
-        pipeline = ImbPipeline(steps=[
-            ('sample', BorderlineSMOTE()),  # Oversampling para balancear
-            ('classifier', model)
-        ])
+                random_search = RandomizedSearchCV(
+                    pipeline,
+                    param_distributions=param_grids[name],
+                    n_iter=15,
+                    cv=3,
+                    verbose=1,
+                    n_jobs=-1,
+                    random_state=42,
+                    scoring='f1_macro'
+                )
     
-        # RandomizedSearchCV
-        random_search = RandomizedSearchCV(
-            pipeline,
-            param_distributions=param_grids[name],
-            n_iter=15,
-            cv=3,
-            verbose=1,
-            n_jobs=-1,
-            random_state=42,
-            scoring='f1_macro'
-        )
+                random_search.fit(Base_X_train_final, y_train)
+                y_pred = random_search.predict(X_test)
     
-        random_search.fit(Base_X_train_final, y_train)
+                report = classification_report(y_test, y_pred, output_dict=True)
+                results[name] = {
+                    "best_params": random_search.best_params_,
+                    "classification_report": report,
+                    "cv_results": pd.DataFrame(random_search.cv_results_)[['params', 'mean_test_score', 'std_test_score']]
+                }
     
-        # Predicciones
-        y_pred = random_search.predict(X_test)
+                st.success("✅ Entrenamiento completado")
+                st.text("Mejores hiperparámetros:")
+                st.json(random_search.best_params_)
+                st.text("Reporte de clasificación:")
+                st.text(classification_report(y_test, y_pred))
     
-        # Reporte
-        report = classification_report(y_test, y_pred, output_dict=True)
-    
-        results[name] = {
-            "best_params": random_search.best_params_,
-            "classification_report": report,
-            "cv_results": pd.DataFrame(random_search.cv_results_)[['params', 'mean_test_score', 'std_test_score']]
-        }
-    
-        print("Mejores hiperparámetros:", random_search.best_params_)
-        print(classification_report(y_test, y_pred))
-    
-        # Matriz de Confusión
-        cm = confusion_matrix(y_test, y_pred)
-        disp = ConfusionMatrixDisplay(confusion_matrix=cm)
-        fig, ax = plt.subplots()
-        disp.plot(ax=ax, cmap="Blues")
-        ax.set_title(f"Matriz de Confusión - {name}")
-        st.pyplot(fig)
-    
-        # Curva ROC (binaria / multiclase)
-        y_score = get_model_scores(random_search.best_estimator_, X_test)
-    
-        if y_score is not None:
-            classes = np.unique(y_test)
-    
-            if len(classes) > 2:
-                # Multiclase
-                y_bin = label_binarize(y_test, classes=classes)
-    
-                fig, ax = plt.subplots(figsize=(8, 8))
-                plt.style.use('seaborn-v0_8-paper')
-    
-                fpr, tpr, roc_auc = {}, {}, {}
-                colors = matplotlib.colormaps['Set2'].resampled(len(classes))
-    
-                for i, color in zip(range(len(classes)), colors.colors):
-                    fpr[i], tpr[i], _ = roc_curve(y_bin[:, i], y_score[:, i])
-                    roc_auc[i] = auc(fpr[i], tpr[i])
-                    ax.plot(fpr[i], tpr[i], color=color, lw=1.5, alpha=0.8,
-                             label=f"Clase {classes[i]} (AUC={roc_auc[i]:.2f})")
-    
-                # Micro-average
-                fpr["micro"], tpr["micro"], _ = roc_curve(y_bin.ravel(), y_score.ravel())
-                roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
-                ax.plot(fpr["micro"], tpr["micro"], label=f"Micro-average (AUC={roc_auc['micro']:.2f})",
-                         color="deeppink", linestyle=":", linewidth=2, alpha=0.9)
-    
-                # Macro-average
-                all_fpr = np.unique(np.concatenate([fpr[i] for i in range(len(classes))]))
-                mean_tpr = np.zeros_like(all_fpr)
-                for i in range(len(classes)):
-                    mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
-                mean_tpr /= len(classes)
-    
-                fpr["macro"] = all_fpr
-                tpr["macro"] = mean_tpr
-                roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
-                ax.plot(fpr["macro"], tpr["macro"], label=f"Macro-average (AUC={roc_auc['macro']:.2f})",
-                         color="navy", linestyle="--", linewidth=2, alpha=0.9)
-    
-                ax.plot([0, 1], [0, 1], "k--", lw=1)
-                ax.set_title(f"Curva ROC Multiclase - {name}", fontsize=16, fontweight='bold')
-                ax.set_xlabel("False Positive Rate", fontsize=14)
-                ax.set_ylabel("True Positive Rate", fontsize=14)
-                ax.legend(loc="lower right", fontsize=12)
-                ax.set_xlim([0.0, 1.0])
-                ax.set_ylim([0.0, 1.05])
-                ax.grid(True, linestyle='--', alpha=0.5)
+                # Matriz de Confusión
+                cm = confusion_matrix(y_test, y_pred)
+                disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+                fig, ax = plt.subplots()
+                disp.plot(ax=ax, cmap="Blues")
+                ax.set_title(f"Matriz de Confusión - {name}")
                 st.pyplot(fig)
     
-            else:
-                # Binaria
-                # En caso de decision_function que retorne 1D, adaptamos:
-                if y_score.ndim == 1 or y_score.shape[1] == 1:
-                    scores_for_roc = y_score.ravel()
+                # Curva ROC
+                y_score = get_model_scores(random_search.best_estimator_, X_test)
+    
+                if y_score is not None:
+                    classes = np.unique(y_test)
+    
+                    if len(classes) > 2:
+                        y_bin = label_binarize(y_test, classes=classes)
+                        fig, ax = plt.subplots(figsize=(8, 8))
+                        plt.style.use('seaborn-v0_8-paper')
+    
+                        fpr, tpr, roc_auc = {}, {}, {}
+                        colors = matplotlib.colormaps['Set2'].resampled(len(classes))
+    
+                        for i, color in zip(range(len(classes)), colors.colors):
+                            fpr[i], tpr[i], _ = roc_curve(y_bin[:, i], y_score[:, i])
+                            roc_auc[i] = auc(fpr[i], tpr[i])
+                            ax.plot(fpr[i], tpr[i], color=color, lw=1.5, alpha=0.8,
+                                    label=f"Clase {classes[i]} (AUC={roc_auc[i]:.2f})")
+    
+                        # Micro y macro average
+                        fpr["micro"], tpr["micro"], _ = roc_curve(y_bin.ravel(), y_score.ravel())
+                        roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+                        ax.plot(fpr["micro"], tpr["micro"], label=f"Micro-average (AUC={roc_auc['micro']:.2f})",
+                                color="deeppink", linestyle=":", linewidth=2, alpha=0.9)
+    
+                        all_fpr = np.unique(np.concatenate([fpr[i] for i in range(len(classes))]))
+                        mean_tpr = np.zeros_like(all_fpr)
+                        for i in range(len(classes)):
+                            mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
+                        mean_tpr /= len(classes)
+                        fpr["macro"] = all_fpr
+                        tpr["macro"] = mean_tpr
+                        roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+                        ax.plot(fpr["macro"], tpr["macro"], label=f"Macro-average (AUC={roc_auc['macro']:.2f})",
+                                color="navy", linestyle="--", linewidth=2, alpha=0.9)
+    
+                        ax.plot([0, 1], [0, 1], "k--", lw=1)
+                        ax.set_title(f"Curva ROC Multiclase - {name}", fontsize=16, fontweight='bold')
+                        ax.set_xlabel("False Positive Rate")
+                        ax.set_ylabel("True Positive Rate")
+                        ax.legend(loc="lower right")
+                        ax.set_xlim([0.0, 1.0])
+                        ax.set_ylim([0.0, 1.05])
+                        ax.grid(True, linestyle='--', alpha=0.5)
+                        st.pyplot(fig)
+    
+                    else:
+                        # Binaria
+                        if y_score.ndim == 1 or y_score.shape[1] == 1:
+                            scores_for_roc = y_score.ravel()
+                        else:
+                            scores_for_roc = y_score[:, 1]
+    
+                        fpr, tpr, _ = roc_curve(y_test, scores_for_roc)
+                        roc_auc_val = auc(fpr, tpr)
+    
+                        fig, ax = plt.subplots()
+                        RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc_val).plot(ax=ax)
+                        ax.set_title(f"Curva ROC Binaria - {name}")
+                        st.pyplot(fig)
+    
                 else:
-                    scores_for_roc = y_score[:, 1]
-    
-                fpr, tpr, _ = roc_curve(y_test, scores_for_roc)
-                roc_auc = auc(fpr, tpr)
-                RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc).plot()
-                ax.set_title(f"Curva ROC Binaria - {name}")
-                st.pyplot(fig)
-    
-        else:
-            st.write(f"No se pudo calcular la curva ROC para {name} porque el modelo no devuelve probabilidades ni decision_function.")
+                    st.warning(f"No se pudo calcular la curva ROC para {name}.")
