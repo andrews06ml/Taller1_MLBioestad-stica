@@ -493,6 +493,8 @@ with tab3:
     for col in X_encoded.select_dtypes(include=['object', 'category']):
         if X_encoded[col].nunique() == 2:  # Solo codificar variables binarias
             X_encoded[col] = X_encoded[col].map({'N': 0, 'Y': 1, 'M': 0 , 'F': 1})
+
+    X_encoded
     
     # Separar la base en entrenamiento y prueba después de codificar
     X_train, X_test, y_train, y_test = train_test_split(X_encoded, y, test_size=0.2, random_state=42)
