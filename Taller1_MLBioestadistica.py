@@ -20,7 +20,7 @@ import prince
 from sklearn.preprocessing import FunctionTransformer, LabelEncoder, StandardScaler
 from sklearn.feature_selection import SequentialFeatureSelector
 from sklearn.compose import ColumnTransformer
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.decomposition import PCA
 from imblearn.over_sampling import BorderlineSMOTE
 from sklearn.pipeline import Pipeline
