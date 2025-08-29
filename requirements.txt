@@ -8,4 +8,5 @@ imbalanced-learn
 mca
 requests
 prince
+xgboost
 scipy
