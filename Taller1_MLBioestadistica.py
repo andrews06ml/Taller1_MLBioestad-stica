@@ -166,26 +166,26 @@ with tab1:
         st.dataframe(category_df, use_container_width=True)
     
     
-    # Filtros
-    with st.sidebar:
-        st.header("Filtros")
-        gender_filter = st.multiselect("Genero", sorted(df["Gender"].dropna().unique()))
-        sleep_filter = st.multiselect("Transtornos del sueño", sorted(df["Sleep disorder"].dropna().unique()))
-        cafe_filter = st.multiselect("Consumo de cafe", sorted(df["Caffeine consumption"].dropna().unique()))
-        alcohol_filter = st.multiselect("Consumo de alcohol", sorted(df["Alcohol consumption"].dropna().unique()))
-        #st.markdown("---")
-        #k_vars = st.slider("Number of variables to select", 2, 10, 5)
+    # # Filtros
+    # with st.sidebar:
+    #     st.header("Filtros")
+    #     gender_filter = st.multiselect("Genero", sorted(df["Gender"].dropna().unique()))
+    #     sleep_filter = st.multiselect("Transtornos del sueño", sorted(df["Sleep disorder"].dropna().unique()))
+    #     cafe_filter = st.multiselect("Consumo de cafe", sorted(df["Caffeine consumption"].dropna().unique()))
+    #     alcohol_filter = st.multiselect("Consumo de alcohol", sorted(df["Alcohol consumption"].dropna().unique()))
+    #     #st.markdown("---")
+    #     #k_vars = st.slider("Number of variables to select", 2, 10, 5)
     
-    # Aplicar filtros
-    for col, values in {
-        "Genero": gender_filter, "Transtornos del sueño": sleep_filter, "Consumo de cafe": cafe_filter, "Consumo de alcohol": alcohol_filter
-    }.items():
-        if values:
-            df = df[df[col].isin(values)]
+    # # Aplicar filtros
+    # for col, values in {
+    #     "Genero": gender_filter, "Transtornos del sueño": sleep_filter, "Consumo de cafe": cafe_filter, "Consumo de alcohol": alcohol_filter
+    # }.items():
+    #     if values:
+    #         df = df[df[col].isin(values)]
     
-    if df.empty:
-        st.warning("No data available after applying filters.")
-        st.stop()
+    # if df.empty:
+    #     st.warning("No data available after applying filters.")
+    #     st.stop()
     
     st.subheader("Tipos de variables")
     st.write(df.dtypes.value_counts())
