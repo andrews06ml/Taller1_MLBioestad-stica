@@ -400,8 +400,8 @@ with tab2:
     pca = PCA(n_components=0.90)  # Selecciona número mínimo de PCs que expliquen 90% de la varianza
     X_pca = pca.fit_transform(X_scaled)
     
-    print(f"Número de componentes principales para explicar 90% varianza: {pca.n_components_}")
-    print(f"Varianza explicada acumulada por estas componentes: {sum(pca.explained_variance_ratio_):.4f}")
+    st.write(f"Número de componentes principales para explicar 90% varianza: {pca.n_components_}")
+    st.write(f"Varianza explicada acumulada por estas componentes: {sum(pca.explained_variance_ratio_):.4f}")
 
     st.subheader("Reducción de dimensionalidad con MCA para variables categóricas")
 
@@ -568,46 +568,46 @@ with tab3:
     selected_wrap_90 = selected_wrap_sorted_by_coefs[:cutoff_wrap]
     
     # --- Resultados ---
-    print("Número de variables para 90% importancia:")
-    print(f"Filtrado (chi2): {len(selected_filter)} variables")
-    print(f"Incrustado (Random Forest): {len(selected_embedded)} variables")
-    print(f"Envoltura (RFECV coef): {len(selected_wrap_90)} variables")
+    st.write("Número de variables para 90% importancia:")
+    st.write(f"Filtrado (chi2): {len(selected_filter)} variables")
+    st.write(f"Incrustado (Random Forest): {len(selected_embedded)} variables")
+    st.write(f"Envoltura (RFECV coef): {len(selected_wrap_90)} variables")
     
-    print("\nVariables seleccionadas por filtrado (chi2, 90% acumulado):")
-    print(selected_filter.tolist())
+    st.write("\nVariables seleccionadas por filtrado (chi2, 90% acumulado):")
+    st.write(selected_filter.tolist())
     
-    print("\nVariables seleccionadas por incrustado (Random Forest, 90% acumulado):")
-    print(selected_embedded.tolist())
+    st.write("\nVariables seleccionadas por incrustado (Random Forest, 90% acumulado):")
+    st.write(selected_embedded.tolist())
     
-    print("\nVariables seleccionadas por envoltura (RFECV coef, 90% acumulado):")
-    print(selected_wrap_90.tolist())
+    st.write("\nVariables seleccionadas por envoltura (RFECV coef, 90% acumulado):")
+    st.write(selected_wrap_90.tolist())
     
     # --- Graficas comparativas ---
-    #fig, axes = plt.subplots(1, 3, figsize=(18, 5)) 
+    fig, axes = plt.subplots(1, 3, figsize=(18, 5)) 
     
-    #axes[0].bar(range(len(sorted_scores_filter)), sorted_scores_filter, color='skyblue')
-    #axes[0].set_xticks(range(len(sorted_features_filter)), sorted_features_filter, rotation=90)
-    #axes[0].set_ylabel("Puntuación (chi2)")
-    #axes[0].set_title('Filtrado (SelectKBest chi2)')
-    #axes[0].axvline(cutoff_filter-1, color='red', linestyle='--', label='90% acumulado')
-    #axes[0].legend()
+    axes[0].bar(range(len(sorted_scores_filter)), sorted_scores_filter, color='skyblue')
+    axes[0].set_xticks(range(len(sorted_features_filter)), sorted_features_filter, rotation=90)
+    axes[0].set_ylabel("Puntuación (chi2)")
+    axes[0].set_title('Filtrado (SelectKBest chi2)')
+    axes[0].axvline(cutoff_filter-1, color='red', linestyle='--', label='90% acumulado')
+    axes[0].legend()
     
-    #axes[1].bar(range(len(sorted_importances_embedded)), sorted_importances_embedded, color='lightgreen')
-    #axes[1].set_xticks(range(len(sorted_features_embedded)), sorted_features_embedded, rotation=90)
-    #axes[1].set_ylabel("Importancia de Característica")
-    #axes[1].set_title('Incrustado (Random Forest)')
-    #axes[1].axvline(cutoff_embedded-1, color='red', linestyle='--', label='90% acumulado')
-    #axes[1].legend()
+    axes[1].bar(range(len(sorted_importances_embedded)), sorted_importances_embedded, color='lightgreen')
+    axes[1].set_xticks(range(len(sorted_features_embedded)), sorted_features_embedded, rotation=90)
+    axes[1].set_ylabel("Importancia de Característica")
+    axes[1].set_title('Incrustado (Random Forest)')
+    axes[1].axvline(cutoff_embedded-1, color='red', linestyle='--', label='90% acumulado')
+    axes[1].legend()
     
-    #axes[2].bar(range(len(abs_coefs_sorted)), abs_coefs_sorted, color='salmon')
-    #axes[2].set_xticks(range(len(selected_wrap_sorted_by_coefs)), selected_wrap_sorted_by_coefs, rotation=90)
-    #axes[2].set_ylabel("Valor absoluto del Coeficiente")
-    #axes[2].set_title('Envoltura (RFECV coef)')
-    #axes[2].axvline(cutoff_wrap-1, color='red', linestyle='--', label='90% acumulado')
-    #axes[2].legend()
+    axes[2].bar(range(len(abs_coefs_sorted)), abs_coefs_sorted, color='salmon')
+    axes[2].set_xticks(range(len(selected_wrap_sorted_by_coefs)), selected_wrap_sorted_by_coefs, rotation=90)
+    axes[2].set_ylabel("Valor absoluto del Coeficiente")
+    axes[2].set_title('Envoltura (RFECV coef)')
+    axes[2].axvline(cutoff_wrap-1, color='red', linestyle='--', label='90% acumulado')
+    axes[2].legend()
     
-    #fig.tight_layout()
-    #st.pyplot(fig)
+    fig.tight_layout()
+    st.pyplot(fig)
 
     st.markdown("### Conclusión")
 
@@ -618,6 +618,6 @@ with tab3:
     """)
 
     # Base de datos seleccionando las variables que aparecen en la gráfica de chi2 y de regresión logistica
-    #Base_X_train_final = X_train_processed_filter[selected_filter.tolist()]
+    Base_X_train_final = X_train_processed_filter[selected_filter.tolist()]
     
-    #Base_X_train_final
+    Base_X_train_final
