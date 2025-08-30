@@ -789,68 +789,68 @@ with tab4:
                 plt.close(fig)
     
                 # Curva ROC
-                y_score = get_model_scores(random_search.best_estimator_, X_test)
+                # y_score = get_model_scores(random_search.best_estimator_, X_test)
     
-                if y_score is not None:
-                    classes = np.unique(y_test)
+                # if y_score is not None:
+                #     classes = np.unique(y_test)
     
-                    if len(classes) > 2:
-                        y_bin = label_binarize(y_test, classes=classes)
-                        fig, ax = plt.subplots(figsize=(8, 8))
-                        plt.style.use('seaborn-v0_8-paper')
+                #     if len(classes) > 2:
+                #         y_bin = label_binarize(y_test, classes=classes)
+                #         fig, ax = plt.subplots(figsize=(8, 8))
+                #         plt.style.use('seaborn-v0_8-paper')
     
-                        fpr, tpr, roc_auc = {}, {}, {}
-                        colors = matplotlib.colormaps['Set2'].resampled(len(classes))
+                #         fpr, tpr, roc_auc = {}, {}, {}
+                #         colors = matplotlib.colormaps['Set2'].resampled(len(classes))
     
-                        for i, color in zip(range(len(classes)), colors.colors):
-                            fpr[i], tpr[i], _ = roc_curve(y_bin[:, i], y_score[:, i])
-                            roc_auc[i] = auc(fpr[i], tpr[i])
-                            ax.plot(fpr[i], tpr[i], color=color, lw=1.5, alpha=0.8,
-                                    label=f"Clase {classes[i]} (AUC={roc_auc[i]:.2f})")
+                #         for i, color in zip(range(len(classes)), colors.colors):
+                #             fpr[i], tpr[i], _ = roc_curve(y_bin[:, i], y_score[:, i])
+                #             roc_auc[i] = auc(fpr[i], tpr[i])
+                #             ax.plot(fpr[i], tpr[i], color=color, lw=1.5, alpha=0.8,
+                #                     label=f"Clase {classes[i]} (AUC={roc_auc[i]:.2f})")
     
-                        # Micro y macro average
-                        fpr["micro"], tpr["micro"], _ = roc_curve(y_bin.ravel(), y_score.ravel())
-                        roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
-                        ax.plot(fpr["micro"], tpr["micro"], label=f"Micro-average (AUC={roc_auc['micro']:.2f})",
-                                color="deeppink", linestyle=":", linewidth=2, alpha=0.9)
+                #         # Micro y macro average
+                #         fpr["micro"], tpr["micro"], _ = roc_curve(y_bin.ravel(), y_score.ravel())
+                #         roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+                #         ax.plot(fpr["micro"], tpr["micro"], label=f"Micro-average (AUC={roc_auc['micro']:.2f})",
+                #                 color="deeppink", linestyle=":", linewidth=2, alpha=0.9)
     
-                        all_fpr = np.unique(np.concatenate([fpr[i] for i in range(len(classes))]))
-                        mean_tpr = np.zeros_like(all_fpr)
-                        for i in range(len(classes)):
-                            mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
-                        mean_tpr /= len(classes)
-                        fpr["macro"] = all_fpr
-                        tpr["macro"] = mean_tpr
-                        roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
-                        ax.plot(fpr["macro"], tpr["macro"], label=f"Macro-average (AUC={roc_auc['macro']:.2f})",
-                                color="navy", linestyle="--", linewidth=2, alpha=0.9)
+                #         all_fpr = np.unique(np.concatenate([fpr[i] for i in range(len(classes))]))
+                #         mean_tpr = np.zeros_like(all_fpr)
+                #         for i in range(len(classes)):
+                #             mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
+                #         mean_tpr /= len(classes)
+                #         fpr["macro"] = all_fpr
+                #         tpr["macro"] = mean_tpr
+                #         roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
+                #         ax.plot(fpr["macro"], tpr["macro"], label=f"Macro-average (AUC={roc_auc['macro']:.2f})",
+                #                 color="navy", linestyle="--", linewidth=2, alpha=0.9)
     
-                        ax.plot([0, 1], [0, 1], "k--", lw=1)
-                        ax.set_title(f"Curva ROC Multiclase - {name}", fontsize=16, fontweight='bold')
-                        ax.set_xlabel("False Positive Rate")
-                        ax.set_ylabel("True Positive Rate")
-                        ax.legend(loc="lower right")
-                        ax.set_xlim([0.0, 1.0])
-                        ax.set_ylim([0.0, 1.05])
-                        ax.grid(True, linestyle='--', alpha=0.5)
-                        st.pyplot(fig)
-                        plt.close(fig)
+                #         ax.plot([0, 1], [0, 1], "k--", lw=1)
+                #         ax.set_title(f"Curva ROC Multiclase - {name}", fontsize=16, fontweight='bold')
+                #         ax.set_xlabel("False Positive Rate")
+                #         ax.set_ylabel("True Positive Rate")
+                #         ax.legend(loc="lower right")
+                #         ax.set_xlim([0.0, 1.0])
+                #         ax.set_ylim([0.0, 1.05])
+                #         ax.grid(True, linestyle='--', alpha=0.5)
+                #         st.pyplot(fig)
+                #         plt.close(fig)
     
-                    else:
-                        # Binaria
-                        if y_score.ndim == 1 or y_score.shape[1] == 1:
-                            scores_for_roc = y_score.ravel()
-                        else:
-                            scores_for_roc = y_score[:, 1]
+                #     else:
+                #         # Binaria
+                #         if y_score.ndim == 1 or y_score.shape[1] == 1:
+                #             scores_for_roc = y_score.ravel()
+                #         else:
+                #             scores_for_roc = y_score[:, 1]
     
-                        fpr, tpr, _ = roc_curve(y_test, scores_for_roc)
-                        roc_auc_val = auc(fpr, tpr)
+                #         fpr, tpr, _ = roc_curve(y_test, scores_for_roc)
+                #         roc_auc_val = auc(fpr, tpr)
     
-                        fig, ax = plt.subplots()
-                        RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc_val).plot(ax=ax)
-                        ax.set_title(f"Curva ROC Binaria - {name}")
-                        st.pyplot(fig)
-                        plt.close(fig)
+                #         fig, ax = plt.subplots()
+                #         RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc_val).plot(ax=ax)
+                #         ax.set_title(f"Curva ROC Binaria - {name}")
+                #         st.pyplot(fig)
+                #         plt.close(fig)
     
-                else:
-                    st.warning(f"No se pudo calcular la curva ROC para {name}.")
+                # else:
+                #     st.warning(f"No se pudo calcular la curva ROC para {name}.")
