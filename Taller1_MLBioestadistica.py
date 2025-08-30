@@ -660,15 +660,14 @@ with tab4:
     """)
     
     # Codificar la base y_train con 0 y 1 
-    y_train = y_train.map({'N': 0, 'Y': 1})
+    y_train = y_train.map({'N': 0, 'Y': 1}).astype(int)
 
     # Codificar la variable y_test y seleccionar sólo las variables independientes seleccionadas de x_test para el análisis
-    y_test = y_test.map({'N': 0, 'Y': 1})
-    X_test = X_test[selected_filter.tolist()]
+    y_test = y_test.map({'N': 0, 'Y': 1}).astype(int)
+    X_test = X_test[selected_filter.tolist()].astype(int)
 
     # Convertir X_test y X_train en tipo numérico
     Base_X_train_final = Base_X_train_final.astype(int)
-    X_test = X_test.astype(int)
     
     # Lista de modelos de ensamble a probar
     models = {
