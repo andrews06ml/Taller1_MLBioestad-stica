@@ -777,7 +777,7 @@ with tab4:
                 st.text("Reporte de clasificación:")
                 report_df = pd.DataFrame(classification_report(y_test, y_pred, output_dict=True)).T
                 report_df = report_df.convert_dtypes()
-                st.dataframe(report_df, width="stretch")
+                #st.dataframe(report_df, width="stretch")
     
                 # Matriz de Confusión
                 cm = confusion_matrix(y_test, y_pred)
