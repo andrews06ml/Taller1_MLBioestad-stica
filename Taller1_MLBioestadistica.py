@@ -615,7 +615,6 @@ with tab3:
     
     # --- Graficas comparativas ---
     fig, axes = plt.subplots(1, 3, figsize=(18, 5)) 
-    
     axes[0].bar(range(len(sorted_scores_filter)), sorted_scores_filter, color='skyblue')
     axes[0].set_xticks(range(len(sorted_features_filter)), sorted_features_filter, rotation=90)
     axes[0].set_ylabel("Puntuación (chi2)")
