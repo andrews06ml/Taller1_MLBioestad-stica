@@ -803,6 +803,7 @@ with tab4:
             # Reporte de clasificación
             st.write("**Reporte de Clasificación:**")
             report_df = pd.DataFrame(result_data["classification_report"]).T
+            report_df = report_df.astype(str)
             st.dataframe(report_df.style.format("{:.3f}"))
             
             # Matriz de Confusión
@@ -813,8 +814,6 @@ with tab4:
             disp.plot(ax=ax, cmap="Blues", colorbar=False)
             ax.set_title(f"Matriz de Confusión - {name}")
             st.pyplot(fig)
-            # No es estrictamente necesario cerrar la figura con st.pyplot,
-            # pero es una buena práctica para liberar memoria.
             plt.close(fig)
 
 
