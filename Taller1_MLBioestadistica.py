@@ -676,7 +676,7 @@ with tab4:
         "ExtraTrees": ExtraTreesClassifier(class_weight='balanced', random_state=42),
         "HistGradientBoosting": HistGradientBoostingClassifier(random_state=42),
         "LogisticRegression": LogisticRegression(class_weight='balanced', random_state=42),
-        "XGBoost": XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42)
+#        "XGBoost": XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42)
         }
     
     # Diccionario de espacios de búsqueda por modelo
@@ -708,13 +708,13 @@ with tab4:
             'classifier__C': uniform(0.01, 10),
             'classifier__solver': ['lbfgs'] 
         },
-        "XGBoost": {
-            'classifier__n_estimators': randint(50, 200),
-            'classifier__max_depth': randint(3, 10),
-            'classifier__gamma': uniform(0, 5),
-            'classifier__learning_rate': [0.01, 0.05, 0.1, 0.2],
-            'classifier__subsample': uniform(0.5, 0.5),
-        }
+#        "XGBoost": {
+#            'classifier__n_estimators': randint(50, 200),
+#            'classifier__max_depth': randint(3, 10),
+#            'classifier__gamma': uniform(0, 5),
+#            'classifier__learning_rate': [0.01, 0.05, 0.1, 0.2],
+#            'classifier__subsample': uniform(0.5, 0.5),
+#        }
     }
 
     def get_model_scores(estimator, X_test):
