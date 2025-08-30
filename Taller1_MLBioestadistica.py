@@ -66,7 +66,7 @@ Haz clic en la pestaña que quieras revisar del taller.
 tab1, tab2, tab3, tab4 = st.tabs(["📊 Exploración de datos", " ✅**Tarea 1 - ACP y MCA**", "✅**Tarea 2 - Aplicación de selectores**", "🔍**Modelos de clasificación**"])
 
 with tab1:
-    st.dataframe(df, use_container_width=True)
+    st.dataframe(df, width="stretch")
     
     # Diccionario de códigos por variable categórica
     category_mappings = {
@@ -144,7 +144,7 @@ with tab1:
             "Non-Null Count": df.notnull().sum().values,
             "Dtype": df.dtypes.values
         })
-        st.dataframe(info_df, use_container_width=True)
+        st.dataframe(info_df, width="stretch")
     
     # Detección automática de variables categóricas
     categorical_vars = [col for col in df.columns 
@@ -163,7 +163,7 @@ with tab1:
             })
     
         category_df = pd.DataFrame(category_info)
-        st.dataframe(category_df, use_container_width=True)
+        st.dataframe(category_df, width="stretch")
     
     
     # # Filtros
@@ -244,6 +244,7 @@ with tab1:
     
     plt.tight_layout()
     st.pyplot(fig)
+    plt.close(fig)
     
     st.subheader("Validación de datos atípicos")
     
@@ -262,6 +263,7 @@ with tab1:
     
     plt.tight_layout()
     st.pyplot(fig)
+    plt.close(fig)
     st.text("Como se puede ver en los diagramas de cajas y bigotes, las 10 variables numéricas contenidas en la base de datos no cuentan con valores atípicos.")
     
     st.subheader("Balance de la variable dependiente (dry eye disease)")
@@ -275,6 +277,7 @@ with tab1:
     sns.countplot(x="Dry Eye Disease", data=df, ax=ax)
     ax.set_title("Distribución de la variable objetivo (Dry Eye Disease)")
     st.pyplot(fig)
+    plt.close(fig)
     st.text("Para esta actividad vamos a tomar como variable objetivo (Dry Eye Disease) que significa que el sujeto tiene la enfermedad del ojo seco. donde Y es si y N es no. Se observa que existen más casos en la base donde el sujeto tiene la enfermedad por lo que podría ser de gran ayuda a la hora de realizar el modelo de clasificación.")
     
     st.subheader("Correlaciones")
@@ -312,6 +315,7 @@ with tab1:
     sns.heatmap(df[num_vars].corr(method="spearman"), annot=True, cmap="coolwarm", annot_kws={"size": 6})
     ax.set_title("Matriz de correlación (Spearman)")
     st.pyplot(fig)
+    plt.close(fig)
     
     # Visualización correlaciones categóricas
     def cramers_v(confusion_matrix):
@@ -340,6 +344,7 @@ with tab1:
     sns.heatmap(assoc_matrix, annot=True, cmap="coolwarm", vmin=0, vmax=1, annot_kws={"size": 7})
     ax.set_title("Mapa de calor de asociación (Cramer's V) entre variables categóricas")
     st.pyplot(fig)
+    plt.close(fig)
     
     st.header("Separación del df y la variable a predecir")
     
@@ -383,6 +388,7 @@ with tab2:
     ax.set_title('Varianza acumulada explicada por PCA')
     ax.grid(True)
     st.pyplot(fig)
+    plt.close(fig)
 
     st.markdown("### Gráfica de número de componentes que explican más del 80% de la varianza acumulada")
     
@@ -402,6 +408,7 @@ with tab2:
     ax.set_title('Scatterplot PC1 vs PC2')
     ax.legend(title='Clase', labels=['Enfermo', 'No enfermo'])
     st.pyplot(fig)
+    plt.close(fig)
 
     st.markdown("### Loadings")
     # Conocer los nombres de las columnas de X_train
@@ -414,6 +421,7 @@ with tab2:
     sns.heatmap(loadings.iloc[:,:11], annot=True, cmap='coolwarm', center=0, ax=ax)
     ax.set_title('Heatmap de loadings (primeras 10 PCs)')
     st.pyplot(fig)
+    plt.close(fig)
     
     # Aplicar PCA
     pca = PCA(n_components=0.90)  # Selecciona número mínimo de PCs que expliquen 90% de la varianza
@@ -449,6 +457,7 @@ with tab2:
     ax.set_title('Varianza acumulada explicada por MCA')
     ax.grid(True)
     st.pyplot(fig)
+    plt.close(fig)
 
     # Coordenadas individuos (2 primeras dimensiones)
     coords = mca.row_coordinates(X_train_cat_encoded)
@@ -460,6 +469,7 @@ with tab2:
     ax.set_title('Scatterplot MCA Dim 1 vs Dim 2')
     ax.legend(title='Clase', labels=['Y', 'N']) # Ajustar etiquetas de leyenda
     st.pyplot(fig)
+    plt.close(fig)
 
     # Coordenadas de las columnas (variables categóricas)
     loadings_cat = mca.column_coordinates(X_train_cat_encoded).iloc[:, :2]
@@ -479,6 +489,7 @@ with tab2:
     ax.tick_params(rotation=90, axis = "x")
     fig.tight_layout()
     st.pyplot(fig)
+    plt.close(fig)
 
     st.markdown("### Conclusión")
     st.markdown(""" Despues de realizar técnicas de reducción de dimensionalidad tanto para variables numéricas (ACP), como para variables categóricas (MCA), se concluye que:
@@ -627,6 +638,7 @@ with tab3:
     
     fig.tight_layout()
     st.pyplot(fig)
+    plt.close(fig)
 
     st.markdown("### Conclusión")
 
@@ -751,10 +763,16 @@ with tab4:
                 }
     
                 st.success("✅ Entrenamiento completado")
+                
+                # Hiperparámetros (convertir a str por seguridad)
                 st.text("Mejores hiperparámetros:")
-                st.json(random_search.best_params_)
+                st.json({k: str(v) for k, v in random_search.best_params_.items()})
+                
+                # Reporte de clasificación en DataFrame
                 st.text("Reporte de clasificación:")
-                st.text(classification_report(y_test, y_pred))
+                report_df = pd.DataFrame(classification_report(y_test, y_pred, output_dict=True)).T
+                report_df = report_df.convert_dtypes()
+                st.dataframe(report_df, width="stretch")
     
                 # Matriz de Confusión
                 cm = confusion_matrix(y_test, y_pred)
@@ -763,6 +781,7 @@ with tab4:
                 disp.plot(ax=ax, cmap="Blues")
                 ax.set_title(f"Matriz de Confusión - {name}")
                 st.pyplot(fig)
+                plt.close(fig)
     
                 # Curva ROC
                 y_score = get_model_scores(random_search.best_estimator_, X_test)
@@ -810,6 +829,7 @@ with tab4:
                         ax.set_ylim([0.0, 1.05])
                         ax.grid(True, linestyle='--', alpha=0.5)
                         st.pyplot(fig)
+                        plt.close(fig)
     
                     else:
                         # Binaria
@@ -825,6 +845,7 @@ with tab4:
                         RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc_val).plot(ax=ax)
                         ax.set_title(f"Curva ROC Binaria - {name}")
                         st.pyplot(fig)
+                        plt.close(fig)
     
                 else:
                     st.warning(f"No se pudo calcular la curva ROC para {name}.")
