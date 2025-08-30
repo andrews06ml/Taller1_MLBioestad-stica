@@ -735,9 +735,9 @@ with tab4:
 
     # Botón para iniciar entrenamiento
     if 'results' not in st.session_state:
-    st.session_state.results = None
+        st.session_state.results = None
     if 'training_done' not in st.session_state:
-    st.session_state.training_done = False
+        st.session_state.training_done = False
 
     # Botón para iniciar el entrenamiento
     if st.button("🚀 Entrenar Modelos", disabled=st.session_state.training_done):
