@@ -509,7 +509,7 @@ with tab2:
     # convertir array en dataframe
     X_reduced_df = pd.DataFrame(X_reduced, columns=[f'PC{i+1}' for i in range(pca.n_components_)] + [f'MCA{i}' for i in range(1,14)])
 
-    X_reduced_df
+    st.dataframe(X_reduced_df)
 
 with tab3:
     st.subheader("Selector por filtrado (chi2), incrustada (Randomforest), envoltura (Regresion logistica)")
@@ -651,7 +651,7 @@ with tab3:
     # Base de datos seleccionando las variables que aparecen en la gráfica de chi2 y de regresión logistica
     Base_X_train_final = X_train_processed_filter[selected_filter.tolist()]
     
-    Base_X_train_final
+    st.dataframe(Base_X_train_final)
 
 with tab4:
     st.subheader("Modelos de clasificación para predecir si un paciente tiene enfermedad de ojos secos")
@@ -666,6 +666,10 @@ with tab4:
     y_test = y_test.map({'N': 0, 'Y': 1})
     X_test = X_test[selected_filter.tolist()]
 
+    # Convertir X_test y X_train en tipo numérico
+    Base_X_train_final = Base_X_train_final.astype(int)
+    X_test = X_test.astype(int)
+    
     # Lista de modelos de ensamble a probar
     models = {
         "RandomForest": RandomForestClassifier(class_weight='balanced', random_state=42),
