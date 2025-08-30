@@ -664,10 +664,11 @@ with tab4:
 
     # Codificar la variable y_test y seleccionar sólo las variables independientes seleccionadas de x_test para el análisis
     y_test = y_test.map({'N': 0, 'Y': 1}).astype(int)
-    X_test = X_test[selected_filter.tolist()].astype(int)
+    X_test = X_test[selected_filter.tolist()]
 
-    # Convertir X_test y X_train en tipo numérico
-    Base_X_train_final = Base_X_train_final.astype(int)
+    # Convertir X_test y X_train en tipo entero
+    Base_X_train_final = Base_X_train_final.apply(lambda col: col.astype(int) if col.dtype.name == 'category' else col)
+    X_test = X_test.apply(lambda col: col.astype(int) if col.dtype.name == 'category' else col)
     
     # Lista de modelos de ensamble a probar
     models = {
