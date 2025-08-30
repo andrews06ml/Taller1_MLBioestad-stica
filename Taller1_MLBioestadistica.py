@@ -675,7 +675,7 @@ with tab4:
         "RandomForest": RandomForestClassifier(class_weight='balanced', random_state=42),
         "ExtraTrees": ExtraTreesClassifier(class_weight='balanced', random_state=42),
         "HistGradientBoosting": HistGradientBoostingClassifier(random_state=42),
-        "LogisticRegression": LogisticRegression(class_weight='balanced', random_state=42),
+#        "LogisticRegression": LogisticRegression(class_weight='balanced', random_state=42),
 #        "XGBoost": XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42)
         }
     
@@ -703,11 +703,11 @@ with tab4:
             'classifier__max_depth': randint(2, 10),
             'classifier__max_leaf_nodes': randint(10, 50)
         },
-        "LogisticRegression": {
-            'classifier__penalty': ['l2', 'none'],
-            'classifier__C': uniform(0.01, 10),
-            'classifier__solver': ['lbfgs'] 
-        },
+#        "LogisticRegression": {
+#            'classifier__penalty': ['l2', 'none'],
+#            'classifier__C': uniform(0.01, 10),
+#            'classifier__solver': ['lbfgs'] 
+#        },
 #        "XGBoost": {
 #            'classifier__n_estimators': randint(50, 200),
 #            'classifier__max_depth': randint(3, 10),
