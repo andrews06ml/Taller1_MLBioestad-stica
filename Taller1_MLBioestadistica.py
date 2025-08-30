@@ -41,6 +41,7 @@ from sklearn.svm import SVC
 from sklearn.preprocessing import label_binarize
 import matplotlib
 from xgboost import XGBClassifier
+from imblearn.over_sampling import SMOTEN
 
 
 st.set_page_config(page_title="Taller1_MLBioestadística", layout="wide")
@@ -741,7 +742,7 @@ with tab4:
                 st.markdown(f"### 🔍 Modelo: `{name}`")
     
                 pipeline = ImbPipeline(steps=[
-                    ('sample', BorderlineSMOTE()),
+                    ('sample', SMOTEN(random_state=42)),
                     ('classifier', model)
                 ])
     
