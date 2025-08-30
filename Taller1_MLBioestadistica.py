@@ -663,7 +663,7 @@ with tab4:
     y_train = y_train.map({'N': 0, 'Y': 1})
 
     # Codificar la variable y_test y seleccionar sólo las variables independientes seleccionadas de x_test para el análisis
-    y_test = y_test.map({'N': 0, 'Y': 1}))
+    y_test = y_test.map({'N': 0, 'Y': 1})
     X_test = X_test[selected_filter.tolist()]
 
     # Convertir X_test y X_train en tipo entero
