@@ -674,7 +674,7 @@ with tab4:
     models = {
         "RandomForest": RandomForestClassifier(class_weight='balanced', random_state=42),
         "ExtraTrees": ExtraTreesClassifier(class_weight='balanced', random_state=42),
-        "HistGradientBoosting": HistGradientBoostingClassifier(random_state=42),
+        "HistGradientBoosting": HistGradientBoostingClassifier(random_state=42)
 #        "LogisticRegression": LogisticRegression(class_weight='balanced', random_state=42),
 #        "XGBoost": XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42)
         }
