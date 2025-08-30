@@ -734,123 +734,109 @@ with tab4:
             return None
 
     # Botón para iniciar entrenamiento
-    if st.button("🚀 Entrenar Modelos"):
-        with st.spinner("Entrenando modelos, por favor espera..."):
-            results = {}
-    
+    if 'results' not in st.session_state:
+    st.session_state.results = None
+    if 'training_done' not in st.session_state:
+    st.session_state.training_done = False
+
+    # Botón para iniciar el entrenamiento
+    if st.button("🚀 Entrenar Modelos", disabled=st.session_state.training_done):
+        st.session_state.training_done = False # Reinicia por si se quiere volver a entrenar
+        
+        with st.spinner("Entrenando modelos, esto puede tardar varios minutos..."):
+            results_temp = {}
+            
             for name, model in models.items():
-                st.markdown(f"### 🔍 Modelo: `{name}`")
-    
+                # Usamos st.info para dar feedback del progreso dentro del spinner
+                st.info(f"Entrenando modelo: `{name}`...")
+                
                 pipeline = ImbPipeline(steps=[
                     ('sample', SMOTEN(random_state=42)),
                     ('classifier', model)
                 ])
-    
+                
                 random_search = RandomizedSearchCV(
                     pipeline,
                     param_distributions=param_grids[name],
                     n_iter=15,
                     cv=3,
                     verbose=1,
-                    n_jobs=-1,
+                    # 2. Solución: Limitar los jobs para no saturar el servidor de Streamlit
+                    n_jobs=-2, 
                     random_state=42,
                     scoring='f1_macro'
                 )
-    
+                
                 random_search.fit(Base_X_train_final, y_train)
                 y_pred = random_search.predict(X_test)
-    
+                
                 report = classification_report(y_test, y_pred, output_dict=True)
-                results[name] = {
+                cm = confusion_matrix(y_test, y_pred)
+                
+                results_temp[name] = {
                     "best_params": random_search.best_params_,
                     "classification_report": report,
+                    "confusion_matrix": cm,
                     "cv_results": pd.DataFrame(random_search.cv_results_)[['params', 'mean_test_score', 'std_test_score']]
                 }
     
-                st.success("✅ Entrenamiento completado")
-                
-                # Hiperparámetros (convertir a str por seguridad)
-                st.text("Mejores hiperparámetros:")
-                st.json({k: str(v) for k, v in random_search.best_params_.items()})
-                
-                # Reporte de clasificación en DataFrame
-                st.text("Reporte de clasificación:")
-                report_df = pd.DataFrame(classification_report(y_test, y_pred, output_dict=True)).T
-                report_df = report_df.convert_dtypes()
-                #st.dataframe(report_df, width="stretch")
+            # 3. Guardar los resultados en el session_state UNA VEZ que todo el bucle ha terminado
+            st.session_state.results = results_temp
+            st.session_state.training_done = True
+            st.success("✅ ¡Entrenamiento completado!")
+            # Forzar una re-ejecución para mostrar los resultados inmediatamente
+            st.experimental_rerun()
     
-                # Matriz de Confusión
-                cm = confusion_matrix(y_test, y_pred)
-                disp = ConfusionMatrixDisplay(confusion_matrix=cm)
-                fig, ax = plt.subplots()
-                disp.plot(ax=ax, cmap="Blues")
-                ax.set_title(f"Matriz de Confusión - {name}")
-                st.pyplot(fig)
-                plt.close(fig)
+    # 4. Mostrar los resultados SÓLO SI el entrenamiento ha terminado
+    # Este bloque de código está ahora fuera del 'if st.button'
+    if st.session_state.training_done and st.session_state.results:
+        st.header("📊 Resultados del Entrenamiento")
     
-                # Curva ROC
-                # y_score = get_model_scores(random_search.best_estimator_, X_test)
+        for name, result_data in st.session_state.results.items():
+            st.markdown(f"---")
+            st.markdown(f"### 🔍 Modelo: `{name}`")
     
-                # if y_score is not None:
-                #     classes = np.unique(y_test)
-    
-                #     if len(classes) > 2:
-                #         y_bin = label_binarize(y_test, classes=classes)
-                #         fig, ax = plt.subplots(figsize=(8, 8))
-                #         plt.style.use('seaborn-v0_8-paper')
-    
-                #         fpr, tpr, roc_auc = {}, {}, {}
-                #         colors = matplotlib.colormaps['Set2'].resampled(len(classes))
-    
-                #         for i, color in zip(range(len(classes)), colors.colors):
-                #             fpr[i], tpr[i], _ = roc_curve(y_bin[:, i], y_score[:, i])
-                #             roc_auc[i] = auc(fpr[i], tpr[i])
-                #             ax.plot(fpr[i], tpr[i], color=color, lw=1.5, alpha=0.8,
-                #                     label=f"Clase {classes[i]} (AUC={roc_auc[i]:.2f})")
-    
-                #         # Micro y macro average
-                #         fpr["micro"], tpr["micro"], _ = roc_curve(y_bin.ravel(), y_score.ravel())
-                #         roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
-                #         ax.plot(fpr["micro"], tpr["micro"], label=f"Micro-average (AUC={roc_auc['micro']:.2f})",
-                #                 color="deeppink", linestyle=":", linewidth=2, alpha=0.9)
-    
-                #         all_fpr = np.unique(np.concatenate([fpr[i] for i in range(len(classes))]))
-                #         mean_tpr = np.zeros_like(all_fpr)
-                #         for i in range(len(classes)):
-                #             mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
-                #         mean_tpr /= len(classes)
-                #         fpr["macro"] = all_fpr
-                #         tpr["macro"] = mean_tpr
-                #         roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
-                #         ax.plot(fpr["macro"], tpr["macro"], label=f"Macro-average (AUC={roc_auc['macro']:.2f})",
-                #                 color="navy", linestyle="--", linewidth=2, alpha=0.9)
-    
-                #         ax.plot([0, 1], [0, 1], "k--", lw=1)
-                #         ax.set_title(f"Curva ROC Multiclase - {name}", fontsize=16, fontweight='bold')
-                #         ax.set_xlabel("False Positive Rate")
-                #         ax.set_ylabel("True Positive Rate")
-                #         ax.legend(loc="lower right")
-                #         ax.set_xlim([0.0, 1.0])
-                #         ax.set_ylim([0.0, 1.05])
-                #         ax.grid(True, linestyle='--', alpha=0.5)
-                #         st.pyplot(fig)
-                #         plt.close(fig)
-    
-                #     else:
-                #         # Binaria
-                #         if y_score.ndim == 1 or y_score.shape[1] == 1:
-                #             scores_for_roc = y_score.ravel()
-                #         else:
-                #             scores_for_roc = y_score[:, 1]
-    
-                #         fpr, tpr, _ = roc_curve(y_test, scores_for_roc)
-                #         roc_auc_val = auc(fpr, tpr)
-    
-                #         fig, ax = plt.subplots()
-                #         RocCurveDisplay(fpr=fpr, tpr=tpr, roc_auc=roc_auc_val).plot(ax=ax)
-                #         ax.set_title(f"Curva ROC Binaria - {name}")
-                #         st.pyplot(fig)
-                #         plt.close(fig)
-    
-                # else:
-                #     st.warning(f"No se pudo calcular la curva ROC para {name}.")
+            # Mejores hiperparámetros
+            st.write("**Mejores hiperparámetros encontrados:**")
+            st.json({k: str(v) for k, v in result_data["best_params"].items()})
+            
+            # Reporte de clasificación
+            st.write("**Reporte de Clasificación:**")
+            report_df = pd.DataFrame(result_data["classification_report"]).T
+            st.dataframe(report_df.style.format("{:.3f}"))
+            
+            # Matriz de Confusión
+            st.write("**Matriz de Confusión:**")
+            cm = result_data["confusion_matrix"]
+            disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+            fig, ax = plt.subplots(figsize=(6, 4))
+            disp.plot(ax=ax, cmap="Blues", colorbar=False)
+            ax.set_title(f"Matriz de Confusión - {name}")
+            st.pyplot(fig)
+            # No es estrictamente necesario cerrar la figura con st.pyplot,
+            # pero es una buena práctica para liberar memoria.
+            plt.close(fig)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
