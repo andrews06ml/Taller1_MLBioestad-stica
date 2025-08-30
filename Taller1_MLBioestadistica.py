@@ -369,7 +369,7 @@ with tab1:
 
 with tab2:
     st.subheader("Reducción de dimensionalidad con PCA para variables numéricas")
-    st.markdown("### Gráfica de número de componentes que explican más del 80% de la varianza acumulada")
+    st.markdown("### Gráfica de número de componentes que explican más del 90% de la varianza acumulada")
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X_train_num)
     
@@ -390,7 +390,7 @@ with tab2:
     st.pyplot(fig)
     plt.close(fig)
 
-    st.markdown("### Gráfica de número de componentes que explican más del 80% de la varianza acumulada")
+    st.markdown("### Gráfica de número de componentes que explican más del 90% de la varianza acumulada")
     
     fig, ax = plt.subplots(figsize=(8, 6))
     
@@ -419,7 +419,7 @@ with tab2:
     
     fig, ax = plt.subplots(figsize=(12,8))
     sns.heatmap(loadings.iloc[:,:11], annot=True, cmap='coolwarm', center=0, ax=ax)
-    ax.set_title('Heatmap de loadings (primeras 10 PCs)')
+    ax.set_title('Heatmap de loadings (primeras 11 PCs)')
     st.pyplot(fig)
     plt.close(fig)
     
@@ -702,7 +702,7 @@ with tab4:
             'classifier__learning_rate': [0.01, 0.05, 0.1, 0.2],
             'classifier__max_depth': randint(2, 10),
             'classifier__max_leaf_nodes': randint(10, 50)
-        },
+        }
 #        "LogisticRegression": {
 #            'classifier__penalty': ['l2', 'none'],
 #            'classifier__C': uniform(0.01, 10),
