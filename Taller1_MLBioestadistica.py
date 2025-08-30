@@ -143,7 +143,7 @@ with tab1:
         info_df = pd.DataFrame({
             "Column": df.columns,
             "Non-Null Count": df.notnull().sum().values,
-            "Dtype": df.dtypes.values
+            "Dtype": df.dtypes.astype(str).values  # <-- forzar a string
         })
         st.dataframe(info_df, width="stretch")
     
